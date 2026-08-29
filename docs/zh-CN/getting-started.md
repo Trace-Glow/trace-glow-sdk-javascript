@@ -141,8 +141,12 @@ const telemetry = new TraceGlow({
 
 | 参数 | 类型 | 默认值 | 作用 |
 | --- | --- | --- | --- |
-| `errors` | `boolean` | `true` | 采集全局 JavaScript 错误；全局错误监控也会观察未处理的 Promise rejection。 |
+| `errors` | `boolean` | `true` | 采集 `window` error 事件中的未捕获全局 JavaScript 错误。 |
+| `unhandledRejections` | `boolean` | `true` | 独立于同步错误和资源错误，采集未处理的 Promise rejection。 |
 | `resources` | `boolean` | `true` | 采集图片、脚本和样式表加载失败，不采集 DOM 文本。 |
+| `console` | `boolean` | `true` | 采集 `console.error` 和 `console.warn` 作为监控事件，同时保留原始控制台输出。 |
+| `breadcrumbs` | `boolean` | `true` | 将最近的 console、资源、HTTP 和异常 Breadcrumb 附加到错误事件。 |
+| `maxBreadcrumbs` | `number` | `100` | 每个浏览器客户端在内存中保留的 Breadcrumb 最大条数，超出后优先淘汰最早条目。 |
 | `performance` | `boolean` | `true` | 采集浏览器支持的 LCP、布局偏移和长任务性能条目。 |
 | `fetch` | `boolean` | `true` | 采集全局 Fetch 的耗时、状态码和失败信息，同时保持原有应用行为。 |
 | `xhr` | `boolean` | `true` | 采集 `XMLHttpRequest` 的耗时和状态码。 |
@@ -165,6 +169,8 @@ const telemetry = new TraceGlow({
   logger: { minimumLevel: 'info' },
 });
 ```
+
+浏览器错误默认包含有界的 Breadcrumb 快照。Breadcrumb 仅包含简短的 console 摘要和清理后的请求 URL，默认不会采集请求体、Cookie、Authorization Header、DOM 文本、URL 查询参数或 fragment。显式传入的 console 参数和上下文字段仍可能包含业务数据，因此在生产环境启用前应完成隐私评估。
 
 ### Node.js 参数
 

@@ -154,8 +154,12 @@ Pass these fields through the `instrumentation` property of the browser or Vue p
 
 | Option | Type | Default | Purpose |
 | --- | --- | --- | --- |
-| `errors` | `boolean` | `true` | Captures global JavaScript errors. Unhandled Promise rejections are also observed by the global error instrumentation. |
+| `errors` | `boolean` | `true` | Captures uncaught global JavaScript errors from `window` error events. |
+| `unhandledRejections` | `boolean` | `true` | Captures unhandled Promise rejections independently from synchronous errors and resource failures. |
 | `resources` | `boolean` | `true` | Captures failed image, script, and stylesheet loads without collecting DOM text. |
+| `console` | `boolean` | `true` | Captures `console.error` and `console.warn` as monitor events while preserving the original console output. |
+| `breadcrumbs` | `boolean` | `true` | Attaches recent console, resource, HTTP, and exception breadcrumbs to error events. |
+| `maxBreadcrumbs` | `number` | `100` | Maximum breadcrumb entries retained in memory per browser client; older entries are evicted first. |
 | `performance` | `boolean` | `true` | Captures supported LCP, layout shift, and long-task performance entries. |
 | `fetch` | `boolean` | `true` | Instruments global Fetch duration, status, and failures while preserving application behavior. |
 | `xhr` | `boolean` | `true` | Instruments `XMLHttpRequest` duration and status. |
@@ -178,6 +182,13 @@ const telemetry = new TraceGlow({
   logger: { minimumLevel: 'info' },
 });
 ```
+
+Browser errors include a bounded breadcrumb snapshot by default. Breadcrumbs
+contain short console summaries and sanitized request URLs, never request
+bodies, cookies, authorization headers, DOM text, URL queries, or fragments by
+default. Explicit console arguments and context fields may still contain
+application data, so review your privacy policy before enabling collection in
+production.
 
 ### Node.js options
 

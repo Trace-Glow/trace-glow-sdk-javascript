@@ -145,7 +145,7 @@ const telemetry = new TraceGlow({
 
 | 运行时 | 默认埋点 |
 | --- | --- |
-| 浏览器 | JavaScript 错误、未处理的 Promise rejection、资源加载失败、浏览器支持的 LCP/布局偏移/长任务条目、Fetch 和 XHR |
+| 浏览器 | JavaScript 错误、未处理的 Promise rejection、console 错误/警告、有界 Breadcrumb、资源加载失败、浏览器支持的 LCP/布局偏移/长任务条目、Fetch 和 XHR |
 | React | 全部浏览器信号，以及由 `TraceGlowErrorBoundary` 捕获的组件错误 |
 | Node.js | 未捕获异常监控、CPU、内存、事件循环延迟、运行时间，以及通过中间件采集的 HTTP 请求耗时 |
 | 所有运行时 | 带严重级别过滤的结构化日志、用户/标签/额外信息上下文、版本/环境元数据和关联 ID |
