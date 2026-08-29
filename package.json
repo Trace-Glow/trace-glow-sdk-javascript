@@ -1,0 +1,40 @@
+{
+  "name": "trace-glow-sdk-workspace",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.12.4",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "pnpm -r --filter './packages/**' build",
+    "clean": "pnpm -r --filter './packages/**' clean",
+    "commitlint": "commitlint",
+    "lint": "eslint 'packages/**/*.ts' '*.ts' --max-warnings 0",
+    "typecheck": "pnpm -r --filter './packages/**' typecheck && tsc --noEmit -p tsconfig.tests.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "verify:push": "pnpm lint && pnpm typecheck && pnpm build && pnpm test",
+    "prepare": "simple-git-hooks",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "pnpm build && pnpm test && changeset publish"
+  },
+  "simple-git-hooks": {
+    "commit-msg": "pnpm exec commitlint --edit \"$1\"",
+    "pre-push": "pnpm verify:push"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.29.7",
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@types/node": "^22.18.0",
+    "eslint": "^9.39.4",
+    "rimraf": "^6.0.1",
+    "simple-git-hooks": "^2.14.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.68.0",
+    "vitest": "^3.2.4"
+  }
+}
