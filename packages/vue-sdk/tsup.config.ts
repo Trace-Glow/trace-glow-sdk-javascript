@@ -5,12 +5,12 @@ import { defineConfig } from 'tsup';
  * Vue 自身保持 external peer dependency，防止 SDK 打包第二份框架运行时。
  */
 const INTERNAL_MODULES = [
-  '@trace-glow/browser',
-  '@trace-glow/context',
-  '@trace-glow/core',
-  '@trace-glow/logger',
-  '@trace-glow/transport',
-  '@trace-glow/vue',
+  '@trace-glow-internal/browser',
+  '@trace-glow-internal/context',
+  '@trace-glow-internal/core',
+  '@trace-glow-internal/logger',
+  '@trace-glow-internal/transport',
+  '@trace-glow-internal/vue',
 ];
 
 /**

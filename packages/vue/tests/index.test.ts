@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { TelemetryClient } from '@trace-glow/core';
-import type { TelemetryEvent, Transport } from '@trace-glow/core';
+import { TelemetryClient } from '@trace-glow-internal/core';
+import type { TelemetryEvent, Transport } from '@trace-glow-internal/core';
 import type { App, ComponentPublicInstance } from 'vue';
 import { VuePlugin } from '../src/index';
 

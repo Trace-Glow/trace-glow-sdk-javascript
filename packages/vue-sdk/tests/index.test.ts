@@ -11,7 +11,7 @@ afterEach(() => {
 });
 
 /** 验证公开 Vue SDK 的统一构造函数和 Vue Plugin 协议。 */
-describe('@trace-glow-sdk/vue', () => {
+describe('@trace-glow/vue', () => {
   /** 确保 app.use 兼容入口采集 Vue 错误并标识公开 Vue 包。 */
   it('installs as a Vue plugin and reports the public package identity', async () => {
     /** 由全局 Fetch 替代实现捕获的 Collector 信封。 */
@@ -40,7 +40,7 @@ describe('@trace-glow-sdk/vue', () => {
     await telemetry.client.shutdown();
     expect(envelope?.events[0]).toMatchObject({
       name: 'vue.exception',
-      sdk: { name: '@trace-glow-sdk/vue' },
+      sdk: { name: '@trace-glow/vue' },
     });
   });
 });

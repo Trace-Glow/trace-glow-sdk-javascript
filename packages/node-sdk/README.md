@@ -1,10 +1,10 @@
-# @trace-glow-sdk/node
+# @trace-glow/node
 
 The public Trace Glow SDK package for Node.js services. Internal workspace
 modules are bundled into this package, so consumers install only this package.
 
 ```ts
-import { TraceGlow } from '@trace-glow-sdk/node';
+import { TraceGlow } from '@trace-glow/node';
 
 const telemetry = new TraceGlow({
   endpoint: 'https://collector.example.com/v1/events',

@@ -5,7 +5,7 @@ import type {
   TelemetryEvent,
   TelemetryPlugin,
   UserContext,
-} from '@trace-glow/core';
+} from '@trace-glow-internal/core';
 
 /**
  * 维护共享遥测上下文，并向每个事件注入不可变快照。
@@ -13,7 +13,7 @@ import type {
  */
 export class ContextManager implements TelemetryPlugin {
   /** 供内核拒绝重复注册的稳定插件标识。 */
-  readonly name = '@trace-glow/context';
+  readonly name = '@trace-glow-internal/context';
   /** 每次更新都会替换的当前共享上下文，用于避免引用泄漏。 */
   private context: TelemetryContext = {};
   /** 为确定性卸载插件而保留的处理器移除句柄。 */

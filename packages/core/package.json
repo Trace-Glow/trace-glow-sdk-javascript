@@ -1,5 +1,5 @@
 {
-  "name": "@trace-glow/core",
+  "name": "@trace-glow-internal/core",
   "private": true,
   "version": "0.1.0",
   "description": "Runtime-neutral core for the Trace Glow observability SDK",

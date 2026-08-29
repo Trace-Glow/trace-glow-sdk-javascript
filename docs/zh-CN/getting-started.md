@@ -3,7 +3,7 @@
 ## 浏览器
 
 ```ts
-import { TraceGlow } from '@trace-glow-sdk/browser';
+import { TraceGlow } from '@trace-glow/browser';
 
 const telemetry = new TraceGlow({
   apiKey: 'browser-write-key',
@@ -26,7 +26,7 @@ import {
   TraceGlow,
   TraceGlowErrorBoundary,
   TraceGlowProvider,
-} from '@trace-glow-sdk/react';
+} from '@trace-glow/react';
 ```
 
 React 包使用与浏览器包相同的配置和自动埋点。Provider、Hook、ErrorBoundary、SSR、生命周期和隐私行为请参阅 [React 集成文档](react.md)。
@@ -35,7 +35,7 @@ React 包使用与浏览器包相同的配置和自动埋点。Provider、Hook�
 
 ```ts
 import { createApp } from 'vue';
-import { TraceGlow } from '@trace-glow-sdk/vue';
+import { TraceGlow } from '@trace-glow/vue';
 import App from './App.vue';
 
 const app = createApp(App);
@@ -55,7 +55,7 @@ app.mount('#app');
 ## Node.js
 
 ```ts
-import { TraceGlow, createExpressMiddleware } from '@trace-glow-sdk/node';
+import { TraceGlow, createExpressMiddleware } from '@trace-glow/node';
 
 const telemetry = new TraceGlow({
   apiKey: process.env.TRACE_GLOW_API_KEY!,

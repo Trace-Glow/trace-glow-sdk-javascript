@@ -23,25 +23,25 @@ cd ../..
 在浏览器应用仓库中链接浏览器包：
 
 ```sh
-pnpm link --global @trace-glow-sdk/browser
+pnpm link --global @trace-glow/browser
 ```
 
 在 React 应用仓库中链接 React 包：
 
 ```sh
-pnpm link --global @trace-glow-sdk/react
+pnpm link --global @trace-glow/react
 ```
 
 在 Vue 3 应用仓库中链接 Vue 包：
 
 ```sh
-pnpm link --global @trace-glow-sdk/vue
+pnpm link --global @trace-glow/vue
 ```
 
 在 Node.js 服务仓库中链接 Node.js 包：
 
 ```sh
-pnpm link --global @trace-glow-sdk/node
+pnpm link --global @trace-glow/node
 ```
 
 SDK 源码发生变化后，需要在 SDK 仓库中重新运行 `pnpm build`。消费项目会读取重新构建的 `dist` 文件。如果构建工具缓存了依赖产物，需要重启消费项目的开发服务器。
@@ -49,10 +49,10 @@ SDK 源码发生变化后，需要在 SDK 仓库中重新运行 `pnpm build`。�
 重新安装 npm registry 版本前，先在消费项目中移除链接：
 
 ```sh
-pnpm unlink @trace-glow-sdk/browser
-pnpm unlink @trace-glow-sdk/react
-pnpm unlink @trace-glow-sdk/vue
-pnpm unlink @trace-glow-sdk/node
+pnpm unlink @trace-glow/browser
+pnpm unlink @trace-glow/react
+pnpm unlink @trace-glow/vue
+pnpm unlink @trace-glow/node
 pnpm install
 ```
 
@@ -65,16 +65,16 @@ pnpm install
 ```sh
 mkdir -p /tmp/trace-glow-packs
 pnpm build
-pnpm --filter '@trace-glow-sdk/*' pack --pack-destination /tmp/trace-glow-packs
+pnpm --filter '@trace-glow/*' pack --pack-destination /tmp/trace-glow-packs
 ```
 
 在消费项目中安装对应 tarball：
 
 ```sh
-pnpm add /tmp/trace-glow-packs/trace-glow-sdk-browser-0.1.0.tgz
-pnpm add /tmp/trace-glow-packs/trace-glow-sdk-react-0.1.0.tgz
-pnpm add /tmp/trace-glow-packs/trace-glow-sdk-vue-0.1.0.tgz
-pnpm add /tmp/trace-glow-packs/trace-glow-sdk-node-0.1.0.tgz
+pnpm add /tmp/trace-glow-packs/trace-glow-browser-0.1.0.tgz
+pnpm add /tmp/trace-glow-packs/trace-glow-react-0.1.0.tgz
+pnpm add /tmp/trace-glow-packs/trace-glow-vue-0.1.0.tgz
+pnpm add /tmp/trace-glow-packs/trace-glow-node-0.1.0.tgz
 ```
 
 Tarball 测试可以验证 `exports`、类型声明、私有模块内联结果和最终文件白名单，是发布前的必做检查。
@@ -84,10 +84,10 @@ Tarball 测试可以验证 `exports`、类型声明、私有模块内联结果�
 如果消费项目使用 npm，可以在构建后的公开包目录中运行 `npm link`，再在消费项目中执行对应命令：
 
 ```sh
-npm link @trace-glow-sdk/browser
-npm link @trace-glow-sdk/react
-npm link @trace-glow-sdk/vue
-npm link @trace-glow-sdk/node
+npm link @trace-glow/browser
+npm link @trace-glow/react
+npm link @trace-glow/vue
+npm link @trace-glow/node
 ```
 
 不要在 CI 或生产部署中使用链接包，因为链接依赖当前机器的本地路径。

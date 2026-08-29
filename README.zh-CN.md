@@ -28,15 +28,15 @@
 
 ```sh
 # 浏览器应用
-pnpm add @trace-glow-sdk/browser
+pnpm add @trace-glow/browser
 
 # React 应用
-pnpm add @trace-glow-sdk/react
+pnpm add @trace-glow/react
 # Vue 3 应用
-pnpm add @trace-glow-sdk/vue
+pnpm add @trace-glow/vue
 
 # Node.js 服务
-pnpm add @trace-glow-sdk/node
+pnpm add @trace-glow/node
 ```
 
 使用 `npm install` 或 `yarn add` 时，包名保持不变。
@@ -46,7 +46,7 @@ pnpm add @trace-glow-sdk/node
 ### 浏览器
 
 ```ts
-import { TraceGlow } from '@trace-glow-sdk/browser';
+import { TraceGlow } from '@trace-glow/browser';
 
 const telemetry = new TraceGlow({
   endpoint: 'https://collector.example.com/v1/events',
@@ -69,7 +69,7 @@ import {
   TraceGlow,
   TraceGlowErrorBoundary,
   TraceGlowProvider,
-} from '@trace-glow-sdk/react';
+} from '@trace-glow/react';
 ```
 
 React 包包含全部浏览器埋点，并通过 `TraceGlowErrorBoundary` 上报 `react.component_error` 组件错误。消费项目需要提供 React 18 或 19 peer dependency。Provider、Hook、fallback、reset 和生命周期所有权请参阅 [React 集成文档](docs/zh-CN/react.md)。
@@ -78,7 +78,7 @@ React 包包含全部浏览器埋点，并通过 `TraceGlowErrorBoundary` 上报
 
 ```ts
 import { createApp } from 'vue';
-import { TraceGlow } from '@trace-glow-sdk/vue';
+import { TraceGlow } from '@trace-glow/vue';
 import App from './App.vue';
 
 const app = createApp(App);
@@ -101,7 +101,7 @@ app.mount('#app');
 import {
   createExpressMiddleware,
   TraceGlow,
-} from '@trace-glow-sdk/node';
+} from '@trace-glow/node';
 
 const telemetry = new TraceGlow({
   endpoint: 'https://collector.example.com/v1/events',
@@ -174,10 +174,10 @@ Trace Glow 使用至少一次投递语义：
 
 | 包 | 运行时 | 说明 |
 | --- | --- | --- |
-| [`@trace-glow-sdk/browser`](packages/browser-sdk) | 现代浏览器 | 自包含浏览器 SDK，提供埋点、上下文、日志以及 HTTP/Beacon Transport |
-| [`@trace-glow-sdk/react`](packages/react-sdk) | React 18/19 | 浏览器 SDK 加 Provider、Hook 和组件 ErrorBoundary；React 保持为 peer dependency |
-| [`@trace-glow-sdk/vue`](packages/vue-sdk) | Vue 3 | 自包含 Vue SDK，提供浏览器埋点和组件异常采集；Vue 保持为 peer dependency |
-| [`@trace-glow-sdk/node`](packages/node-sdk) | Node.js 18+ | 自包含服务端 SDK，提供进程指标、请求上下文、日志以及 HTTP/框架中间件 |
+| [`@trace-glow/browser`](packages/browser-sdk) | 现代浏览器 | 自包含浏览器 SDK，提供埋点、上下文、日志以及 HTTP/Beacon Transport |
+| [`@trace-glow/react`](packages/react-sdk) | React 18/19 | 浏览器 SDK 加 Provider、Hook 和组件 ErrorBoundary；React 保持为 peer dependency |
+| [`@trace-glow/vue`](packages/vue-sdk) | Vue 3 | 自包含 Vue SDK，提供浏览器埋点和组件异常采集；Vue 保持为 peer dependency |
+| [`@trace-glow/node`](packages/node-sdk) | Node.js 18+ | 自包含服务端 SDK，提供进程指标、请求上下文、日志以及 HTTP/框架中间件 |
 
 `packages/core`、`packages/context`、`packages/transport`、`packages/logger`、`packages/browser`、`packages/vue` 和 `packages/node` 属于私有实现边界。它们会打包进公开 JavaScript 和类型声明产物，不应由消费项目直接安装。
 

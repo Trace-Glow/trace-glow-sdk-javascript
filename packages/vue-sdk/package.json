@@ -1,5 +1,5 @@
 {
-  "name": "@trace-glow-sdk/vue",
+  "name": "@trace-glow/vue",
   "version": "0.1.0",
   "description": "Trace Glow observability SDK for Vue 3 applications",
   "license": "MIT",

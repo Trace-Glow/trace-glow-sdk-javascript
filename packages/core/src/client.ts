@@ -12,7 +12,7 @@ import type {
 } from './types';
 
 /** 嵌入每个事件、用于 Collector 兼容性诊断的 SDK 标识。 */
-const SDK = { name: '@trace-glow/core', version: '0.1.0' } as const;
+const SDK = { name: '@trace-glow-internal/core', version: '0.1.0' } as const;
 /** 保守的重试默认值用于平衡瞬时故障恢复与关闭延迟。 */
 const DEFAULT_RETRY: Required<RetryConfig> = { attempts: 3, baseDelayMs: 250, maxDelayMs: 5_000 };
 

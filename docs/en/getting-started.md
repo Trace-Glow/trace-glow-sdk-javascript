@@ -3,7 +3,7 @@
 ## Browser
 
 ```ts
-import { TraceGlow } from '@trace-glow-sdk/browser';
+import { TraceGlow } from '@trace-glow/browser';
 
 const telemetry = new TraceGlow({
   apiKey: 'browser-write-key',
@@ -27,7 +27,7 @@ import {
   TraceGlow,
   TraceGlowErrorBoundary,
   TraceGlowProvider,
-} from '@trace-glow-sdk/react';
+} from '@trace-glow/react';
 ```
 
 The React package uses the same configuration and automatic browser instrumentation as the browser package. See the [React integration guide](react.md) for Provider, Hook, ErrorBoundary, SSR, lifecycle, and privacy behavior.
@@ -36,7 +36,7 @@ The React package uses the same configuration and automatic browser instrumentat
 
 ```ts
 import { createApp } from 'vue';
-import { TraceGlow } from '@trace-glow-sdk/vue';
+import { TraceGlow } from '@trace-glow/vue';
 import App from './App.vue';
 
 const app = createApp(App);
@@ -59,7 +59,7 @@ and flush queued events during a controlled teardown.
 ## Node.js
 
 ```ts
-import { TraceGlow, createExpressMiddleware } from '@trace-glow-sdk/node';
+import { TraceGlow, createExpressMiddleware } from '@trace-glow/node';
 
 const telemetry = new TraceGlow({
   apiKey: process.env.TRACE_GLOW_API_KEY!,

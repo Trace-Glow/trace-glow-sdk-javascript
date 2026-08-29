@@ -1,4 +1,4 @@
-import type { SendOptions, TelemetryEvent, Transport } from '@trace-glow/core';
+import type { SendOptions, TelemetryEvent, Transport } from '@trace-glow-internal/core';
 
 /** 具备响应确认的 HTTP Collector 投递配置。 */
 export interface HttpTransportOptions {

@@ -1,5 +1,5 @@
 {
-  "name": "@trace-glow/transport",
+  "name": "@trace-glow-internal/transport",
   "private": true,
   "version": "0.1.0",
   "description": "HTTP and Beacon transports for Trace Glow",
@@ -16,5 +16,5 @@
     "clean": "rimraf dist",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
-  "dependencies": { "@trace-glow/core": "workspace:*" }
+  "dependencies": { "@trace-glow-internal/core": "workspace:*" }
 }

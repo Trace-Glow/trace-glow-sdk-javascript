@@ -1,4 +1,4 @@
-import type { TelemetryClientApi, TelemetryPlugin } from '@trace-glow/core';
+import type { TelemetryClientApi, TelemetryPlugin } from '@trace-glow-internal/core';
 import type { App, ComponentPublicInstance } from 'vue';
 
 /** Vue 应用配置公开的错误处理器签名。 */
@@ -42,7 +42,7 @@ function componentName(instance: ComponentPublicInstance | null): string | undef
 /** 将 Vue 全局错误处理器连接到 Trace Glow 客户端的生命周期插件。 */
 export class VuePlugin implements TelemetryPlugin {
   /** 用于拒绝重复注册的私有工作区插件标识。 */
-  readonly name = '@trace-glow/vue';
+  readonly name = '@trace-glow-internal/vue';
   /** 接收 Vue 异常且保证 capture 不影响宿主控制流的客户端。 */
   private readonly client: TelemetryClientApi;
   /** 保留每个应用的原处理器，以便 shutdown 时精确恢复。 */

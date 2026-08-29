@@ -7,7 +7,7 @@ import type {
   TelemetryClientApi,
   TelemetryEvent,
   TelemetryPlugin,
-} from '@trace-glow/core';
+} from '@trace-glow-internal/core';
 
 /** 用于监听器、计时器或运行时监控器的幂等卸载操作。 */
 type Cleanup = () => void;
@@ -35,7 +35,7 @@ function errorPayload(error: unknown): Record<string, unknown> {
 /** 安装进程失败监听器和有界运行时指标采集。 */
 export class NodePlugin implements TelemetryPlugin {
   /** 用于拒绝重复安装的私有工作区插件标识。 */
-  readonly name = '@trace-glow/node';
+  readonly name = '@trace-glow-internal/node';
   /** 按安装相反顺序执行的卸载栈。 */
   private readonly cleanups: Cleanup[] = [];
   /** 完整归一化选项可避免在热路径中重复解析默认值。 */
@@ -148,7 +148,7 @@ export class NodePlugin implements TelemetryPlugin {
 /** 使用请求级标识丰富事件的 AsyncLocalStorage 插件。 */
 export class NodeRequestContext implements TelemetryPlugin {
   /** 独立标识使其可与通用 Node.js 埋点插件同时使用。 */
-  readonly name = '@trace-glow/node-request-context';
+  readonly name = '@trace-glow-internal/node-request-context';
   /** 异步本地存储在并发请求链之间隔离关联数据。 */
   private readonly storage = new AsyncLocalStorage<CorrelationContext>();
   /** 为确定性卸载而保留的事件处理器移除函数。 */

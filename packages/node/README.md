@@ -1,4 +1,4 @@
-# @trace-glow/node (private workspace package)
+# @trace-glow-internal/node (private workspace package)
 
 Node.js process/runtime monitoring, async request correlation, and middleware
 compatible with Node HTTP, Express, Koa, and Nest middleware consumers.

@@ -15,17 +15,17 @@ the event envelope defined here.
 
 | Workspace package | Responsibility | Publication |
 | --- | --- | --- |
-| `@trace-glow/core` | lifecycle, plugin API, event contract, bounded queue, batching, sampling, retry | private, bundled |
-| `@trace-glow/context` | user, tags, environment, release and correlation context | private, bundled |
-| `@trace-glow/transport` | Fetch HTTP, gzip, and browser Beacon delivery | private, bundled |
-| `@trace-glow/logger` | structured logger and severity filtering | private, bundled |
-| `@trace-glow/browser` | errors, rejected promises, resource failures, performance, fetch and XHR | private, bundled |
-| `@trace-glow/vue` | Vue application error-handler installation, delegation and teardown | private, bundled |
-| `@trace-glow/node` | process failures, runtime metrics, HTTP middleware and framework adapters | private, bundled |
-| `@trace-glow-sdk/browser` | self-contained public browser SDK | public npm package |
-| `@trace-glow-sdk/react` | browser SDK with React Provider, Hook, and ErrorBoundary | public npm package; React peer |
-| `@trace-glow-sdk/vue` | self-contained public Vue 3 SDK; Vue is a peer dependency | public npm package |
-| `@trace-glow-sdk/node` | self-contained public Node.js SDK | public npm package |
+| `@trace-glow-internal/core` | lifecycle, plugin API, event contract, bounded queue, batching, sampling, retry | private, bundled |
+| `@trace-glow-internal/context` | user, tags, environment, release and correlation context | private, bundled |
+| `@trace-glow-internal/transport` | Fetch HTTP, gzip, and browser Beacon delivery | private, bundled |
+| `@trace-glow-internal/logger` | structured logger and severity filtering | private, bundled |
+| `@trace-glow-internal/browser` | errors, rejected promises, resource failures, performance, fetch and XHR | private, bundled |
+| `@trace-glow-internal/vue` | Vue application error-handler installation, delegation and teardown | private, bundled |
+| `@trace-glow-internal/node` | process failures, runtime metrics, HTTP middleware and framework adapters | private, bundled |
+| `@trace-glow/browser` | self-contained public browser SDK | public npm package |
+| `@trace-glow/react` | browser SDK with React Provider, Hook, and ErrorBoundary | public npm package; React peer |
+| `@trace-glow/vue` | self-contained public Vue 3 SDK; Vue is a peer dependency | public npm package |
+| `@trace-glow/node` | self-contained public Node.js SDK | public npm package |
 
 Dependencies point inward: runtime plugins may depend on core, but core never
 imports a runtime plugin. All public packages expose the same `TraceGlow` class

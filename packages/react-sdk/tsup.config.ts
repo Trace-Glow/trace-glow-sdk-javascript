@@ -2,11 +2,11 @@ import { defineConfig } from 'tsup';
 
 /** 必须嵌入 React 公开包的浏览器运行时与共享私有模块。 */
 const INTERNAL_MODULES = [
-  '@trace-glow/browser',
-  '@trace-glow/context',
-  '@trace-glow/core',
-  '@trace-glow/logger',
-  '@trace-glow/transport',
+  '@trace-glow-internal/browser',
+  '@trace-glow-internal/context',
+  '@trace-glow-internal/core',
+  '@trace-glow-internal/logger',
+  '@trace-glow-internal/transport',
 ];
 
 /**

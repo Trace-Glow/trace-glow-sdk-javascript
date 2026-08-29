@@ -2,11 +2,11 @@ import { defineConfig } from 'tsup';
 
 /** 嵌入公开 Node.js 包的私有工作区模块。 */
 const INTERNAL_MODULES = [
-  '@trace-glow/context',
-  '@trace-glow/core',
-  '@trace-glow/logger',
-  '@trace-glow/node',
-  '@trace-glow/transport',
+  '@trace-glow-internal/context',
+  '@trace-glow-internal/core',
+  '@trace-glow-internal/logger',
+  '@trace-glow-internal/node',
+  '@trace-glow-internal/transport',
 ];
 
 /**

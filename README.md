@@ -42,15 +42,15 @@ Choose the package for the runtime you need:
 
 ```sh
 # Browser applications
-pnpm add @trace-glow-sdk/browser
+pnpm add @trace-glow/browser
 
 # React applications
-pnpm add @trace-glow-sdk/react
+pnpm add @trace-glow/react
 # Vue 3 applications
-pnpm add @trace-glow-sdk/vue
+pnpm add @trace-glow/vue
 
 # Node.js services
-pnpm add @trace-glow-sdk/node
+pnpm add @trace-glow/node
 ```
 
 The same package names can be used with `npm install` or `yarn add`.
@@ -60,7 +60,7 @@ The same package names can be used with `npm install` or `yarn add`.
 ### Browser
 
 ```ts
-import { TraceGlow } from '@trace-glow-sdk/browser';
+import { TraceGlow } from '@trace-glow/browser';
 
 const telemetry = new TraceGlow({
   endpoint: 'https://collector.example.com/v1/events',
@@ -84,7 +84,7 @@ import {
   TraceGlow,
   TraceGlowErrorBoundary,
   TraceGlowProvider,
-} from '@trace-glow-sdk/react';
+} from '@trace-glow/react';
 ```
 
 The React package includes all browser instrumentation and reports component
@@ -96,7 +96,7 @@ fallback rendering, reset behavior, and lifecycle ownership.
 
 ```ts
 import { createApp } from 'vue';
-import { TraceGlow } from '@trace-glow-sdk/vue';
+import { TraceGlow } from '@trace-glow/vue';
 import App from './App.vue';
 
 const app = createApp(App);
@@ -120,7 +120,7 @@ Vue component error capture while preserving an existing app error handler.
 import {
   createExpressMiddleware,
   TraceGlow,
-} from '@trace-glow-sdk/node';
+} from '@trace-glow/node';
 
 const telemetry = new TraceGlow({
   endpoint: 'https://collector.example.com/v1/events',
@@ -204,10 +204,10 @@ Four packages are public:
 
 | Package | Runtime | Description |
 | --- | --- | --- |
-| [`@trace-glow-sdk/browser`](packages/browser-sdk) | Modern browsers | Self-contained browser SDK with instrumentation, context, logging, and HTTP/Beacon transports |
-| [`@trace-glow-sdk/react`](packages/react-sdk) | React 18/19 | Browser SDK plus Provider, Hook, and component ErrorBoundary; React remains a peer dependency |
-| [`@trace-glow-sdk/vue`](packages/vue-sdk) | Vue 3 | Self-contained Vue SDK with browser instrumentation and component error capture; Vue remains a peer dependency |
-| [`@trace-glow-sdk/node`](packages/node-sdk) | Node.js 18+ | Self-contained server SDK with process metrics, request context, logging, and HTTP/framework middleware |
+| [`@trace-glow/browser`](packages/browser-sdk) | Modern browsers | Self-contained browser SDK with instrumentation, context, logging, and HTTP/Beacon transports |
+| [`@trace-glow/react`](packages/react-sdk) | React 18/19 | Browser SDK plus Provider, Hook, and component ErrorBoundary; React remains a peer dependency |
+| [`@trace-glow/vue`](packages/vue-sdk) | Vue 3 | Self-contained Vue SDK with browser instrumentation and component error capture; Vue remains a peer dependency |
+| [`@trace-glow/node`](packages/node-sdk) | Node.js 18+ | Self-contained server SDK with process metrics, request context, logging, and HTTP/framework middleware |
 
 The packages under `packages/core`, `packages/context`, `packages/transport`,
 `packages/logger`, `packages/browser`, `packages/vue`, and `packages/node` are private

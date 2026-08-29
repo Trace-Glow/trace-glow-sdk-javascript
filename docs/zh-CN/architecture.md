@@ -10,17 +10,17 @@ Trace Glow 用于采集 JavaScript 监控事件和结构化日志。当采集服
 
 | Workspace 包 | 职责 | 发布方式 |
 | --- | --- | --- |
-| `@trace-glow/core` | 生命周期、插件 API、事件契约、有界队列、批处理、采样、重试 | 私有，打入公开包 |
-| `@trace-glow/context` | 用户、标签、环境、版本及关联上下文 | 私有，打入公开包 |
-| `@trace-glow/transport` | Fetch HTTP、gzip 和浏览器 Beacon 发送 | 私有，打入公开包 |
-| `@trace-glow/logger` | 结构化日志及日志级别过滤 | 私有，打入公开包 |
-| `@trace-glow/browser` | 异常、Promise rejection、资源失败、性能、Fetch 和 XHR | 私有，打入公开包 |
-| `@trace-glow/vue` | Vue 应用错误处理器的安装、委托和卸载 | 私有，打入公开包 |
-| `@trace-glow/node` | 进程异常、运行时指标、HTTP 中间件及框架适配器 | 私有，打入公开包 |
-| `@trace-glow-sdk/browser` | 自包含的浏览器 SDK | 公开 npm 包 |
-| `@trace-glow-sdk/react` | 带 React Provider、Hook 和 ErrorBoundary 的浏览器 SDK | 公开 npm 包；React peer dependency |
-| `@trace-glow-sdk/vue` | 自包含的 Vue 3 SDK；Vue 为 peer dependency | 公开 npm 包 |
-| `@trace-glow-sdk/node` | 自包含的 Node.js SDK | 公开 npm 包 |
+| `@trace-glow-internal/core` | 生命周期、插件 API、事件契约、有界队列、批处理、采样、重试 | 私有，打入公开包 |
+| `@trace-glow-internal/context` | 用户、标签、环境、版本及关联上下文 | 私有，打入公开包 |
+| `@trace-glow-internal/transport` | Fetch HTTP、gzip 和浏览器 Beacon 发送 | 私有，打入公开包 |
+| `@trace-glow-internal/logger` | 结构化日志及日志级别过滤 | 私有，打入公开包 |
+| `@trace-glow-internal/browser` | 异常、Promise rejection、资源失败、性能、Fetch 和 XHR | 私有，打入公开包 |
+| `@trace-glow-internal/vue` | Vue 应用错误处理器的安装、委托和卸载 | 私有，打入公开包 |
+| `@trace-glow-internal/node` | 进程异常、运行时指标、HTTP 中间件及框架适配器 | 私有，打入公开包 |
+| `@trace-glow/browser` | 自包含的浏览器 SDK | 公开 npm 包 |
+| `@trace-glow/react` | 带 React Provider、Hook 和 ErrorBoundary 的浏览器 SDK | 公开 npm 包；React peer dependency |
+| `@trace-glow/vue` | 自包含的 Vue 3 SDK；Vue 为 peer dependency | 公开 npm 包 |
+| `@trace-glow/node` | 自包含的 Node.js SDK | 公开 npm 包 |
 
 依赖只能向内：运行时插件可以依赖 core，但 core 永远不能导入运行时插件。所有公开包暴露相同的 `TraceGlow` 类和公共配置结构，但包入口与运行时 Bundle 仍保持隔离。公开包会内联私有实现模块及其类型声明，因此 npm tarball 不会依赖未发布的 workspace 包。
 

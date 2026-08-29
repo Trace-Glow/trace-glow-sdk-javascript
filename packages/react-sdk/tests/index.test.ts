@@ -52,7 +52,7 @@ function createTelemetry(): TraceGlow {
 }
 
 /** 验证 React 公开入口、Context 和错误边界行为。 */
-describe('@trace-glow-sdk/react', () => {
+describe('@trace-glow/react', () => {
   /** 确保事件信封标识 React 公开包而不是浏览器或私有内核。 */
   it('reports the public React package identity', async () => {
     /** 由注入的全局 Fetch 替代实现捕获的 Collector 信封。 */
@@ -67,7 +67,7 @@ describe('@trace-glow-sdk/react', () => {
     await telemetry.ready;
     telemetry.logger.info('identity');
     await telemetry.client.shutdown();
-    expect(envelope?.events[0]?.sdk.name).toBe('@trace-glow-sdk/react');
+    expect(envelope?.events[0]?.sdk.name).toBe('@trace-glow/react');
   });
 
   /** 确保 Hook 从 Provider 读取同一个应用级实例。 */
