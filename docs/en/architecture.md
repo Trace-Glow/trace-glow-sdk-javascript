@@ -24,6 +24,7 @@ the event envelope defined here.
 | `@trace-glow-internal/node` | process failures, runtime metrics, HTTP middleware and framework adapters | private, bundled |
 | `@trace-glow/browser` | self-contained public browser SDK | public npm package |
 | `@trace-glow/react` | browser SDK with React Provider, Hook, and ErrorBoundary | public npm package; React peer |
+| `@trace-glow/next` | client React integration plus Node server entry for Next.js | public npm package; Next.js and React peers |
 | `@trace-glow/vue` | self-contained public Vue 3 SDK; Vue is a peer dependency | public npm package |
 | `@trace-glow/node` | self-contained public Node.js SDK | public npm package |
 
@@ -80,11 +81,11 @@ entire host process budget.
 
 ## Release strategy
 
-The workspace uses pnpm and Changesets. The four public packages are versioned as
+The workspace uses pnpm and Changesets. The five public packages are versioned as
 a linked group during the initial contract-development period. Each public
 package publishes ESM, CommonJS, bundled declarations, source maps, and only its
 `dist` and documentation. CI must run `typecheck`, `test`, `build`, and pack all
-four public packages to a temporary directory before npm publishing with provenance.
+five public packages to a temporary directory before npm publishing with provenance.
 `dist` and documentation. CI must run `typecheck`, `test`, `build`, and pack all three
 public packages to a temporary directory before npm publishing with provenance.
 

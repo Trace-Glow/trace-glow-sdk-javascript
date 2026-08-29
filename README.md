@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-Collect browser, React, Vue, and Node.js errors, runtime signals, HTTP timing, and structured
+Collect browser, React, Vue, Next.js, and Node.js errors, runtime signals, HTTP timing, and structured
 logs, then deliver them to a Trace Glow collector through a bounded,
 failure-isolated pipeline.
 
@@ -19,7 +19,7 @@ failure-isolated pipeline.
 
 ## Why Trace Glow
 
-- **One package per runtime.** Install the browser, React, Vue, or Node.js SDK; shared
+- **One package per runtime.** Install the browser, React, Vue, Next.js, or Node.js SDK; shared
   implementation modules are bundled and never become consumer dependencies.
 - **One constructor everywhere.** Browser, React, Vue, and Node.js applications start
   with `new TraceGlow(config)`, with runtime-specific choices isolated under
@@ -46,6 +46,10 @@ pnpm add @trace-glow/browser
 
 # React applications
 pnpm add @trace-glow/react
+
+# Next.js applications
+pnpm add @trace-glow/next
+
 # Vue 3 applications
 pnpm add @trace-glow/vue
 
@@ -200,12 +204,13 @@ the client-generated event ID; the SDK does not claim exactly-once delivery.
 
 ## Packages
 
-Four packages are public:
+Five packages are public:
 
 | Package | Runtime | Description |
 | --- | --- | --- |
 | [`@trace-glow/browser`](packages/browser-sdk) | Modern browsers | Self-contained browser SDK with instrumentation, context, logging, and HTTP/Beacon transports |
 | [`@trace-glow/react`](packages/react-sdk) | React 18/19 | Browser SDK plus Provider, Hook, and component ErrorBoundary; React remains a peer dependency |
+| [`@trace-glow/next`](packages/next-sdk) | Next.js 14-16 | Client React integration plus Node server entry; Next.js and React remain peer dependencies |
 | [`@trace-glow/vue`](packages/vue-sdk) | Vue 3 | Self-contained Vue SDK with browser instrumentation and component error capture; Vue remains a peer dependency |
 | [`@trace-glow/node`](packages/node-sdk) | Node.js 18+ | Self-contained server SDK with process metrics, request context, logging, and HTTP/framework middleware |
 
@@ -225,8 +230,7 @@ ownership, read the [architecture guide](docs/en/architecture.md).
 - Browser output targets ES2022 and requires a modern Fetch-capable browser.
   Applications targeting older browsers must provide the required transpilation
   and polyfills.
-- All public packages provide ESM, CommonJS, source maps, and TypeScript
-- All four public packages provide ESM, CommonJS, source maps, and TypeScript
+- All five public packages provide ESM, CommonJS, source maps, and TypeScript
   declarations.
 
 ## Development
@@ -248,7 +252,7 @@ for accepted types and examples.
 
 For consumer-app debugging, use the documented
 [local linking and tarball workflows](docs/en/local-development.md). Publishing
-uses Changesets and linked versions for the four public packages; see the
+uses Changesets and linked versions for the five public packages; see the
 [publishing guide](docs/en/publishing.md) before preparing a release.
 
 Repository changes must follow [AGENTS.md](AGENTS.md), including synchronized
@@ -258,3 +262,9 @@ comments.
 ## License
 
 [MIT](LICENSE) © Trace Glow contributors
+### Next.js
+
+The Next.js package provides a client-safe React integration at
+`@trace-glow/next` and a Node runtime entry at `@trace-glow/next/server` for
+`instrumentation.ts`, route handlers, and request middleware. See the
+[Next.js integration guide](docs/en/next.md).

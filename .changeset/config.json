@@ -8,7 +8,8 @@
       "@trace-glow/browser",
       "@trace-glow/react",
       "@trace-glow/vue",
-      "@trace-glow/node"
+      "@trace-glow/node",
+      "@trace-glow/next"
     ]
   ],
   "access": "public",

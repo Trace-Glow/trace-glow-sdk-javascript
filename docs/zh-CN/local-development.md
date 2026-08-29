@@ -4,13 +4,16 @@
 
 ## 使用 pnpm link 快速迭代
 
-在本仓库中构建公开包，并将四个包注册到 pnpm 全局链接存储：
+在本仓库中构建公开包，并将五个包注册到 pnpm 全局链接存储：
 
 ```sh
 pnpm build
 cd packages/browser-sdk
 pnpm link --global
 cd ../react-sdk
+pnpm link --global
+cd ../next-sdk
+pnpm link --global
 cd ../vue-sdk
 pnpm link --global
 cd ../node-sdk
@@ -32,6 +35,12 @@ pnpm link --global @trace-glow/browser
 pnpm link --global @trace-glow/react
 ```
 
+在 Next.js 应用仓库中链接 Next.js 包：
+
+```sh
+pnpm link --global @trace-glow/next
+```
+
 在 Vue 3 应用仓库中链接 Vue 包：
 
 ```sh
@@ -51,6 +60,7 @@ SDK 源码发生变化后，需要在 SDK 仓库中重新运行 `pnpm build`。�
 ```sh
 pnpm unlink @trace-glow/browser
 pnpm unlink @trace-glow/react
+pnpm unlink @trace-glow/next
 pnpm unlink @trace-glow/vue
 pnpm unlink @trace-glow/node
 pnpm install

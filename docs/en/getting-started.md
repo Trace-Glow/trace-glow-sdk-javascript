@@ -84,7 +84,7 @@ process.on('SIGTERM', async () => {
 
 ### Common client options
 
-All four public packages expose `new TraceGlow(config)`. Common option names are
+All five public packages expose `new TraceGlow(config)`. Common option names are
 identical; only the fields inside `instrumentation` are runtime-specific.
 
 | Option | Type | Required / default | Purpose |

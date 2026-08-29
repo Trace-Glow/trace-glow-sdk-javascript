@@ -2,7 +2,7 @@
 
 ## 前置条件
 
-1. 确认 npm 账户或组织拥有 `@trace-glow` scope。公开发布 `@trace-glow/browser`、`@trace-glow/react`、`@trace-glow/vue` 和 `@trace-glow/node` 四个包。
+1. 确认 npm 账户或组织拥有 `@trace-glow` scope。公开发布 `@trace-glow/browser`、`@trace-glow/react`、`@trace-glow/vue`、`@trace-glow/next` 和 `@trace-glow/node` 五个包。
 2. 将 npm automation token 添加为仓库 Secret：`NPM_TOKEN`。
 3. 允许 GitHub Actions 创建 Pull Request，并配置 npm trusted publishing；也可以保留发布工作流中的 Token 认证方式。
 
@@ -35,4 +35,4 @@ mkdir -p /tmp/trace-glow-packs
 pnpm --filter '@trace-glow/*' pack --pack-destination /tmp/trace-glow-packs
 ```
 
-检查四个公开包的 tarball，确认浏览器、React 和 Vue 产物没有引用 Node.js 内置模块，框架依赖保持为外部 peer dependency，并且所有 tarball 都没有声明对私有 `@trace-glow/*` workspace 包的运行时依赖。
+检查五个公开包的 tarball，确认浏览器、React、Next 和 Vue 产物没有引用不适用的 Node.js 内置模块，框架依赖保持为外部 peer dependency，并且所有 tarball 都没有声明对私有 `@trace-glow/*` workspace 包的运行时依赖。
