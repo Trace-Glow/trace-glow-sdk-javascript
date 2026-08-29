@@ -8,7 +8,17 @@
 
 ## 创建发布版本
 
-运行 `pnpm changeset`，选择受影响的包，并将生成的 Markdown 文件与代码改动一起提交。在 `main` 分支上，发布工作流会维护一个版本 Pull Request。合并该 Pull Request 后，将执行构建、测试，并使用 npm provenance 发布所有关联版本。
+运行 `pnpm changeset`，选择受影响的包，并将生成的 Markdown 文件与代码改动一起提交。发布前先更新包版本和 changelog，提交结果，然后创建并推送版本 tag：
+
+```sh
+pnpm version-packages
+git add .
+git commit -m "chore: version packages"
+git tag v0.1.0
+git push origin main --follow-tags
+```
+
+推送 `v*` tag 会触发发布工作流。工作流会构建并测试 workspace，然后执行 `changeset publish`，使用 npm provenance 发布关联的包版本。
 
 私有 `@trace-glow-internal/*` 模块只会被内联，不会单独发布。修改私有模块时，仍必须为行为受到影响的公开包添加 Changeset。
 
