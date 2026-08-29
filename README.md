@@ -172,7 +172,7 @@ details.
 
 | Runtime | Default instrumentation |
 | --- | --- |
-| Browser | JavaScript errors, unhandled Promise rejections, failed resources, supported LCP/layout-shift/long-task entries, Fetch, and XHR |
+| Browser | JavaScript errors, unhandled Promise rejections, console errors/warnings, bounded breadcrumbs, failed resources, supported LCP/layout-shift/long-task entries, Fetch, and XHR |
 | React | All browser signals plus component errors captured by `TraceGlowErrorBoundary` |
 | Node.js | Uncaught exception monitoring, CPU, memory, event-loop delay, uptime, and HTTP request timing through middleware |
 | All runtimes | Structured severity-filtered logs, user/tag/extra context, release/environment metadata, and correlation IDs |

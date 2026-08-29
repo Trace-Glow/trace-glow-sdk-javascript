@@ -4,8 +4,16 @@ import type { TelemetryClientApi, TelemetryPlugin } from '@trace-glow/core';
 export interface BrowserPluginOptions {
   /** 采集同步 ErrorEvent 失败。 */
   errors?: boolean;
+  /** 采集未处理的 Promise rejection。 */
+  unhandledRejections?: boolean;
   /** 采集图片、脚本和样式表资源加载失败。 */
   resources?: boolean;
+  /** 捕获 console.error 和 console.warn，同时保留原始控制台输出。 */
+  console?: boolean;
+  /** 为错误事件附加最近的 Breadcrumb 操作线索。 */
+  breadcrumbs?: boolean;
+  /** Breadcrumb 缓冲区最大条目数。 */
+  maxBreadcrumbs?: number;
   /** 观察受支持的浏览器性能条目类型。 */
   performance?: boolean;
   /** 包装全局 Fetch 调用以采集耗时和状态。 */
@@ -16,6 +24,20 @@ export interface BrowserPluginOptions {
   includeUrlQuery?: boolean;
   /** 从网络遥测中排除的 URL 前缀或表达式。 */
   ignoreUrls?: readonly (string | RegExp)[];
+}
+
+/** 用于还原错误发生前操作链的有限 Breadcrumb。 */
+interface BrowserBreadcrumb {
+  /** 产生线索的 ISO 8601 时间。 */
+  timestamp: string;
+  /** 线索来源类别。 */
+  category: string;
+  /** 面向开发者的短摘要。 */
+  message: string;
+  /** 可选结构化摘要数据。 */
+  data?: Record<string, unknown>;
+  /** 线索严重级别。 */
+  level: 'info' | 'warning' | 'error';
 }
 
 /** 用于单个监听器、观察器或运行时修改的幂等卸载操作。 */
@@ -61,12 +83,23 @@ export class BrowserPlugin implements TelemetryPlugin {
   private client: TelemetryClientApi | undefined;
   /** 无需重复处理默认值即可读取的完整归一化功能选项。 */
   private readonly options: Required<BrowserPluginOptions>;
+  /** 有界 Breadcrumb 缓冲区，避免高频操作无限增长内存。 */
+  private readonly breadcrumbs: BrowserBreadcrumb[] = [];
 
   /** 归一化浏览器功能开关与隐私安全默认值。 */
   constructor(options: BrowserPluginOptions = {}) {
+    /** 将 Breadcrumb 上限归一化并在插件安装前拒绝无效资源边界。 */
+    const maxBreadcrumbs = options.maxBreadcrumbs ?? 100;
+    if (!Number.isInteger(maxBreadcrumbs) || maxBreadcrumbs < 1) {
+      throw new Error('maxBreadcrumbs must be a positive integer');
+    }
     this.options = {
       errors: options.errors ?? true,
+      unhandledRejections: options.unhandledRejections ?? true,
       resources: options.resources ?? true,
+      console: options.console ?? true,
+      breadcrumbs: options.breadcrumbs ?? true,
+      maxBreadcrumbs,
       performance: options.performance ?? true,
       fetch: options.fetch ?? true,
       xhr: options.xhr ?? true,
@@ -82,7 +115,8 @@ export class BrowserPlugin implements TelemetryPlugin {
   setup(client: TelemetryClientApi): void {
     this.client = client;
     if (typeof window === 'undefined') return;
-    if (this.options.errors || this.options.resources) this.observeErrors();
+    if (this.options.errors || this.options.resources || this.options.unhandledRejections) this.observeErrors();
+    if (this.options.console) this.instrumentConsole();
     if (this.options.performance) this.observePerformance();
     if (this.options.fetch) this.instrumentFetch();
     if (this.options.xhr) this.instrumentXhr();
@@ -91,6 +125,7 @@ export class BrowserPlugin implements TelemetryPlugin {
   /** 恢复被修改的全局对象，并移除所有已安装监听器或观察器。 */
   teardown(): void {
     for (const cleanup of this.cleanups.splice(0).reverse()) cleanup();
+    this.breadcrumbs.length = 0;
     this.client = undefined;
   }
 
@@ -99,6 +134,10 @@ export class BrowserPlugin implements TelemetryPlugin {
     /** 共享捕获阶段处理器用于区分运行时错误和资源失败。 */
     const onError = (event: ErrorEvent | Event): void => {
       if (event instanceof ErrorEvent && this.options.errors) {
+        /** 先复制历史线索，避免当前异常把自身写入 Breadcrumb 快照。 */
+        const breadcrumbs = this.breadcrumbPayload();
+        /** 当前异常在事件入队后成为后续异常的上下文线索。 */
+        this.addBreadcrumb('error', 'browser.exception', { filename: event.filename }, 'error');
         this.client?.capture({
           type: 'monitor',
           name: 'browser.exception',
@@ -108,6 +147,7 @@ export class BrowserPlugin implements TelemetryPlugin {
             filename: event.filename,
             line: event.lineno,
             column: event.colno,
+            ...breadcrumbs,
           },
         });
         return;
@@ -120,6 +160,10 @@ export class BrowserPlugin implements TelemetryPlugin {
           const source = (target as HTMLImageElement).currentSrc
             || (target as HTMLScriptElement).src
             || (target as HTMLLinkElement).href;
+          /** 资源事件只携带发生前的线索，当前资源失败供后续事件关联。 */
+          const breadcrumbs = this.breadcrumbPayload();
+          /** 资源失败线索保留清理后的 URL，供后续异常事件关联。 */
+          this.addBreadcrumb('resource', target.tagName.toLowerCase(), source ? { url: safeUrl(source, this.options.includeUrlQuery) } : undefined, 'error');
           this.client?.capture({
             type: 'monitor',
             name: 'browser.resource_error',
@@ -127,6 +171,7 @@ export class BrowserPlugin implements TelemetryPlugin {
             payload: {
               tag: target.tagName.toLowerCase(),
               ...(source ? { url: safeUrl(source, this.options.includeUrlQuery) } : {}),
+              ...breadcrumbs,
             },
           });
         }
@@ -134,17 +179,85 @@ export class BrowserPlugin implements TelemetryPlugin {
     };
     /** Promise rejection 处理器安全保留任意 rejection 原因。 */
     const onRejection = (event: PromiseRejectionEvent): void => {
+      if (!this.options.unhandledRejections) return;
+      /** rejection 事件先读取历史快照，再将当前 rejection 留给后续故障。 */
+      const breadcrumbs = this.breadcrumbPayload();
+      this.addBreadcrumb('error', 'browser.unhandled_rejection', undefined, 'error');
       this.client?.capture({
         type: 'monitor',
         name: 'browser.unhandled_rejection',
         level: 'error',
-        payload: errorPayload(event.reason),
+        payload: { ...errorPayload(event.reason), ...breadcrumbs },
       });
     };
     window.addEventListener('error', onError, true);
-    window.addEventListener('unhandledrejection', onRejection);
     this.cleanups.push(() => window.removeEventListener('error', onError, true));
-    this.cleanups.push(() => window.removeEventListener('unhandledrejection', onRejection));
+    if (this.options.unhandledRejections) {
+      window.addEventListener('unhandledrejection', onRejection);
+      this.cleanups.push(() => window.removeEventListener('unhandledrejection', onRejection));
+    }
+  }
+
+  /** 包装 console.error 和 console.warn，保留原始输出并产生可关联监控事件。 */
+  private instrumentConsole(): void {
+    if (typeof console === 'undefined') return;
+    /** 仅包装会影响错误诊断的两个控制台级别。 */
+    const methods: Array<'error' | 'warn'> = ['error', 'warn'];
+    for (const method of methods) {
+      /** 保存原始实现，teardown 时仅在未被其他代码替换时恢复。 */
+      const original = console[method];
+      /** 将参数格式化为稳定摘要，避免直接序列化循环对象。 */
+      const message = (...args: unknown[]): string => args.map((value) => {
+        if (value instanceof Error) return `${value.name}: ${value.message}`;
+        if (typeof value === 'string') return value;
+        try { return JSON.stringify(value); } catch { return '[unserializable]'; }
+      }).join(' ').slice(0, 1_000);
+      /** 包装器先记录遥测，再无感调用宿主原始控制台。 */
+      const wrapped = (...args: unknown[]): void => {
+        const summary = message(...args);
+        this.addBreadcrumb('console', summary, undefined, method === 'error' ? 'error' : 'warning');
+        this.client?.capture({
+          type: 'monitor',
+          name: `browser.console_${method}`,
+          level: method === 'error' ? 'error' : 'warn',
+          payload: { message: summary, ...this.breadcrumbPayload() },
+        });
+        try { original.apply(console, args as Parameters<typeof original>); } catch { /* 控制台异常不能进入宿主业务流程。 */ }
+      };
+      console[method] = wrapped as typeof original;
+      this.cleanups.push(() => {
+        if (console[method] === wrapped) console[method] = original;
+      });
+    }
+  }
+
+  /** 将线索写入有界缓冲区，超出上限时淘汰最早条目。 */
+  private addBreadcrumb(
+    category: string,
+    message: string,
+    data?: Record<string, unknown>,
+    level: BrowserBreadcrumb['level'] = 'info',
+  ): void {
+    if (!this.options.breadcrumbs) return;
+    /** 新线索使用当前时间，确保管理平台可以按时间还原操作顺序。 */
+    const breadcrumb: BrowserBreadcrumb = {
+      timestamp: new Date().toISOString(),
+      category,
+      message,
+      ...(data ? { data } : {}),
+      level,
+    };
+    this.breadcrumbs.push(breadcrumb);
+    if (this.breadcrumbs.length > this.options.maxBreadcrumbs) {
+      this.breadcrumbs.splice(0, this.breadcrumbs.length - this.options.maxBreadcrumbs);
+    }
+  }
+
+  /** 返回错误事件使用的 Breadcrumb 快照，避免后续采集改变已入队事件。 */
+  private breadcrumbPayload(): Record<string, unknown> {
+    return this.options.breadcrumbs && this.breadcrumbs.length > 0
+      ? { breadcrumbs: this.breadcrumbs.map((breadcrumb) => ({ ...breadcrumb })) }
+      : {};
   }
 
   /** 观察当前浏览器支持的性能条目类型。 */
@@ -271,6 +384,13 @@ export class BrowserPlugin implements TelemetryPlugin {
       return pattern.test(url);
     });
     if (ignored) return;
+    /** HTTP 事件只附带请求开始前的线索，避免快照包含当前请求自身。 */
+    const breadcrumbs = this.breadcrumbPayload();
+    /** 网络请求摘要作为 Breadcrumb，帮助解释后续脚本异常的触发背景。 */
+    this.addBreadcrumb('http', `${source} ${method.toUpperCase()}`, {
+      url: safeUrl(url, this.options.includeUrlQuery),
+      ...(status !== undefined ? { status } : {}),
+    }, error || (status && status >= 500) ? 'error' : 'info');
     this.client?.capture({
       type: 'monitor',
       name: 'browser.http_request',
@@ -282,6 +402,7 @@ export class BrowserPlugin implements TelemetryPlugin {
         durationMs: Math.max(0, performance.now() - started),
         ...(status !== undefined ? { status } : {}),
         ...(error ? { error: errorPayload(error) } : {}),
+        ...breadcrumbs,
       },
     });
   }
