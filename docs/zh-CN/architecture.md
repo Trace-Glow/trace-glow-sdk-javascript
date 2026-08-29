@@ -15,9 +15,11 @@ Trace Glow 用于采集 JavaScript 监控事件和结构化日志。当采集服
 | `@trace-glow/transport` | Fetch HTTP、gzip 和浏览器 Beacon 发送 | 私有，打入公开包 |
 | `@trace-glow/logger` | 结构化日志及日志级别过滤 | 私有，打入公开包 |
 | `@trace-glow/browser` | 异常、Promise rejection、资源失败、性能、Fetch 和 XHR | 私有，打入公开包 |
+| `@trace-glow/vue` | Vue 应用错误处理器的安装、委托和卸载 | 私有，打入公开包 |
 | `@trace-glow/node` | 进程异常、运行时指标、HTTP 中间件及框架适配器 | 私有，打入公开包 |
 | `@trace-glow-sdk/browser` | 自包含的浏览器 SDK | 公开 npm 包 |
 | `@trace-glow-sdk/react` | 带 React Provider、Hook 和 ErrorBoundary 的浏览器 SDK | 公开 npm 包；React peer dependency |
+| `@trace-glow-sdk/vue` | 自包含的 Vue 3 SDK；Vue 为 peer dependency | 公开 npm 包 |
 | `@trace-glow-sdk/node` | 自包含的 Node.js SDK | 公开 npm 包 |
 
 依赖只能向内：运行时插件可以依赖 core，但 core 永远不能导入运行时插件。所有公开包暴露相同的 `TraceGlow` 类和公共配置结构，但包入口与运行时 Bundle 仍保持隔离。公开包会内联私有实现模块及其类型声明，因此 npm tarball 不会依赖未发布的 workspace 包。
@@ -50,9 +52,9 @@ SDK 异常通过 `onInternalError` 报告，绝不能抛入宿主应用的事件
 
 ## 发布策略
 
-Workspace 使用 pnpm 和 Changesets。在初始契约开发阶段，三个公开包作为 linked group 统一升级版本。每个公开包发布 ESM、CommonJS、已内联的类型声明和 Source Map，并且只包含自身的 `dist` 和文档。
+Workspace 使用 pnpm 和 Changesets。在初始契约开发阶段，四个公开包作为 linked group 统一升级版本。每个公开包发布 ESM、CommonJS、已内联的类型声明和 Source Map，并且只包含自身的 `dist` 和文档。
 
-在带 npm provenance 的发布前，CI 必须执行 `typecheck`、`test`、`build`，并将三个公开包打包到临时目录进行检查。
+在带 npm provenance 的发布前，CI 必须执行 `typecheck`、`test`、`build`，并将四个公开包打包到临时目录进行检查。
 
 ## 交付阶段
 
@@ -60,6 +62,7 @@ Workspace 使用 pnpm 和 Changesets。在初始契约开发阶段，三个公�
 
 - 稳定的事件和插件契约
 - 浏览器异常、性能和网络采集
+- Vue 组件异常采集及既有错误处理器委托
 - Node.js 进程、运行时采集及 HTTP 中间件
 - 上下文、结构化日志、HTTP/Beacon transport
 - 有界批处理、采样、重试、关闭流程和测试

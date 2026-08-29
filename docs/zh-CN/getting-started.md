@@ -27,7 +27,18 @@ import {
   TraceGlowErrorBoundary,
   TraceGlowProvider,
 } from '@trace-glow-sdk/react';
+```
 
+React 包使用与浏览器包相同的配置和自动埋点。Provider、Hook、ErrorBoundary、SSR、生命周期和隐私行为请参阅 [React 集成文档](react.md)。
+
+## Vue 3
+
+```ts
+import { createApp } from 'vue';
+import { TraceGlow } from '@trace-glow-sdk/vue';
+import App from './App.vue';
+
+const app = createApp(App);
 const telemetry = new TraceGlow({
   apiKey: 'browser-write-key',
   endpoint: 'https://collector.example.com/v1/events',
@@ -35,16 +46,11 @@ const telemetry = new TraceGlow({
   environment: 'production',
 });
 
-root.render(
-  <TraceGlowProvider telemetry={telemetry}>
-    <TraceGlowErrorBoundary fallback={<p>页面发生错误。</p>}>
-      <App />
-    </TraceGlowErrorBoundary>
-  </TraceGlowProvider>,
-);
+app.use(telemetry);
+app.mount('#app');
 ```
 
-React 包使用与浏览器包相同的配置和自动埋点。Provider、Hook、ErrorBoundary、SSR、生命周期和隐私行为请参阅 [React 集成文档](react.md)。
+构造函数会立即启动浏览器埋点。`app.use(telemetry)` 会增加 Vue 组件异常采集，并保留应用已经配置的错误处理器。在受控销毁阶段调用 `telemetry.client.shutdown()`，可以恢复错误处理器并刷新队列事件。
 
 ## Node.js
 
@@ -74,7 +80,7 @@ process.on('SIGTERM', async () => {
 
 ### 公共客户端参数
 
-所有公开包都使用 `new TraceGlow(config)`。公共参数名称完全一致，只有 `instrumentation` 内部字段因运行时而不同。
+四个公开包都使用 `new TraceGlow(config)`。公共参数名称完全一致，只有 `instrumentation` 内部字段因运行时而不同。
 
 | 参数 | 类型 | 必填项/默认值 | 作用 |
 | --- | --- | --- | --- |
@@ -93,7 +99,7 @@ process.on('SIGTERM', async () => {
 | `debug` | `DebugOptions` | 关闭 | 控制主动开启的本地调试输出，不会替代 Collector 投递。 |
 | `onInternalError` | `(error: Error) => void` | 可选 | 接收隔离后的 SDK 或 Transport 内部错误。该回调自身抛出的异常会被 SDK 吞掉。 |
 | `onDrop` | `(count, reason) => void` | 可选 | 报告因 `queue_full`、`sampled`、`invalid` 或 `oversized` 而被丢弃的事件。 |
-| `instrumentation` | `BrowserPluginOptions` 或 `NodePluginOptions` | 可选 | 控制运行时专属埋点，同时保持外层配置结构一致；React 使用浏览器选项。 |
+| `instrumentation` | `BrowserPluginOptions` 或 `NodePluginOptions` | 可选 | 控制运行时专属埋点，同时保持外层配置结构一致；浏览器、React 和 Vue 使用浏览器选项。 |
 | `logger` | `LoggerOptions` | 可选 | 设置默认日志级别、上下文和结构化字段。 |
 
 除重试延迟外，所有数值限制都必须是正整数。必填参数或资源限制不合法时，构造函数会抛出异常。
@@ -131,7 +137,7 @@ const telemetry = new TraceGlow({
 
 ### 浏览器参数
 
-以下字段通过浏览器或 React 包的 `instrumentation` 属性传入。
+以下字段通过浏览器、React 或 Vue 包的 `instrumentation` 属性传入。
 
 | 参数 | 类型 | 默认值 | 作用 |
 | --- | --- | --- | --- |
@@ -171,6 +177,20 @@ const telemetry = new TraceGlow({
 | `processErrors` | `boolean` | `true` | 通过 `uncaughtExceptionMonitor` 观察未捕获异常，不阻止 Node.js 按默认行为退出。 |
 | `unhandledRejections` | `boolean` | `false` | 添加 `unhandledRejection` 监听器。该参数默认关闭，因为添加监听器会改变 Node.js 的默认进程行为。 |
 
+### Vue 集成
+
+Vue 包接受上面的浏览器 `instrumentation` 参数。Vue 专属异常采集通过 `app.use(telemetry)` 安装，不需要单独的配置对象。它会生成 `vue.exception` 事件，并包含以下 payload 字段：
+
+| 字段 | 类型 | 作用 |
+| --- | --- | --- |
+| `name` | `string` | Vue 收到 Error 实例时对应的 JavaScript Error 类名。 |
+| `message` | `string` | 错误消息；抛出值不是 Error 时使用安全的回退消息。 |
+| `stack` | `string` | Error 实例提供的可选 JavaScript 调用栈。 |
+| `info` | `string` | Vue 提供的错误来源说明，例如 render 或 setup function。 |
+| `component` | `string` | 从组件公开实例读取的可选显式组件名。 |
+
+该集成不会检查组件 props、响应式状态、渲染 DOM 或任意非 Error 抛出对象。如果应用已经设置错误处理器，Trace Glow 会在采集后继续调用它。shutdown 会恢复原处理器，除非应用在安装后又主动替换了处理器。
+
 ### Logger 参数
 
 以下字段通过 `logger` 属性传入。
@@ -196,6 +216,7 @@ Logger 方法接受稳定的消息名称和可选结构化字段，例如 `logge
 ## 返回对象与上下文方法参数
 
 所有运行时类都会暴露 `client`、`context`、`logger` 和 `ready`。Node.js 类还会暴露 `requestContext`；React 还围绕相同句柄提供 Provider、Hook 和 ErrorBoundary。
+三个运行时类都会暴露 `client`、`context`、`logger` 和 `ready`。Vue 类还会暴露 `vue` 并实现 Vue Plugin 的 `install(app)` 协议，Node.js 类还会暴露 `requestContext`。
 
 | API | 参数作用 |
 | --- | --- |
@@ -207,8 +228,10 @@ Logger 方法接受稳定的消息名称和可选结构化字段，例如 `logge
 | `client.capture(input)` | 手动事件入队。`type` 和 `name` 必填；`level` 默认为 `info`；`timestamp`、事件级 `context` 和 `payload` 可选。 |
 | `client.flush()` | 等待待处理事件，并立即尝试发送当前队列。 |
 | `client.shutdown()` | 停止采集、移除埋点并执行最后一次刷新。 |
+| `install(app)` / `app.use(telemetry)` | 仅 Vue 包支持。幂等安装组件异常采集，同时保留应用已有的错误处理器。 |
 | `ready` | 插件初始化完成后 resolve 的 Promise。应用启动流程必须等待 SDK 初始化时应显式 await。 |
 
 ## 自定义组装
 
 所有公开包会重新导出自定义组装所需的受支持底层 API。需要自定义 transport、上下文或插件行为时，可以直接构造 `TelemetryClient`。插件必须在 `start()` 之前注册；最终的数据脱敏应通过事件处理器完成。私有的 `@trace-glow/*` workspace 包属于实现细节，不会发布到 npm。
+四个公开包会重新导出自定义组装所需的受支持底层 API。需要自定义 transport、上下文或插件行为时，可以直接构造 `TelemetryClient`。插件必须在 `start()` 之前注册；最终的数据脱敏应通过事件处理器完成。私有的 `@trace-glow/*` workspace 包属于实现细节，不会发布到 npm。

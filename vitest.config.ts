@@ -21,6 +21,7 @@ export default defineConfig({
       '@trace-glow/transport': workspaceSource('./packages/transport/src/index.ts'),
       '@trace-glow/logger': workspaceSource('./packages/logger/src/index.ts'),
       '@trace-glow/browser': workspaceSource('./packages/browser/src/index.ts'),
+      '@trace-glow/vue': workspaceSource('./packages/vue/src/index.ts'),
       '@trace-glow/node': workspaceSource('./packages/node/src/index.ts'),
     },
   },

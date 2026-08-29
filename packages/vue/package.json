@@ -1,0 +1,22 @@
+{
+  "name": "@trace-glow/vue",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Vue error integration for Trace Glow",
+  "license": "MIT",
+  "sideEffects": false,
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js", "require": "./dist/index.cjs" } },
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts --sourcemap --clean",
+    "clean": "rimraf dist",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": { "@trace-glow/core": "workspace:*" },
+  "peerDependencies": { "vue": "^3.3.0" },
+  "devDependencies": { "vue": "^3.5.0" }
+}

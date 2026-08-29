@@ -10,10 +10,12 @@
       "@trace-glow/transport": ["packages/transport/src/index.ts"],
       "@trace-glow/logger": ["packages/logger/src/index.ts"],
       "@trace-glow/browser": ["packages/browser/src/index.ts"],
+      "@trace-glow/vue": ["packages/vue/src/index.ts"],
       "@trace-glow/node": ["packages/node/src/index.ts"],
       "@trace-glow-sdk/browser": ["packages/browser-sdk/src/index.ts"],
       "@trace-glow-sdk/node": ["packages/node-sdk/src/index.ts"],
-      "@trace-glow-sdk/react": ["packages/react-sdk/src/index.ts"]
+      "@trace-glow-sdk/react": ["packages/react-sdk/src/index.ts"],
+      "@trace-glow-sdk/vue": ["packages/vue-sdk/src/index.ts"]
     },
     "strict": true,
     "declaration": true,
