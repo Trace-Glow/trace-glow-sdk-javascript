@@ -3,7 +3,7 @@
 ## 安装
 
 ```sh
-pnpm add @trace-glow-sdk/react
+pnpm add @trace-glow/react
 ```
 
 该包支持 React 18 和 19。React 是 peer dependency，不会打入 Bundle，因此应用和 SDK 会使用同一套 Context 与 Hook 运行时。
@@ -17,7 +17,7 @@ import {
   TraceGlow,
   TraceGlowErrorBoundary,
   TraceGlowProvider,
-} from '@trace-glow-sdk/react';
+} from '@trace-glow/react';
 
 const telemetry = new TraceGlow({
   endpoint: 'https://collector.example.com/v1/events',
@@ -45,7 +45,7 @@ root.render(
 `useTraceGlow()` 返回最近 Provider 提供的实例：
 
 ```tsx
-import { useTraceGlow } from '@trace-glow-sdk/react';
+import { useTraceGlow } from '@trace-glow/react';
 
 export function CheckoutButton() {
   const telemetry = useTraceGlow();

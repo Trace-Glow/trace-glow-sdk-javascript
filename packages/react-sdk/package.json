@@ -1,5 +1,5 @@
 {
-  "name": "@trace-glow-sdk/react",
+  "name": "@trace-glow/react",
   "version": "0.1.0",
   "description": "Trace Glow observability SDK for React applications",
   "license": "MIT",

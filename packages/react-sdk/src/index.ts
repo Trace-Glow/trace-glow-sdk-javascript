@@ -1,8 +1,8 @@
-import { BrowserPlugin, type BrowserPluginOptions } from '@trace-glow/browser';
-import { ContextManager } from '@trace-glow/context';
-import { TelemetryClient, type TelemetryClientConfig } from '@trace-glow/core';
-import { Logger, type LoggerOptions } from '@trace-glow/logger';
-import { HttpTransport } from '@trace-glow/transport';
+import { BrowserPlugin, type BrowserPluginOptions } from '@trace-glow-internal/browser';
+import { ContextManager } from '@trace-glow-internal/context';
+import { TelemetryClient, type TelemetryClientConfig } from '@trace-glow-internal/core';
+import { Logger, type LoggerOptions } from '@trace-glow-internal/logger';
+import { HttpTransport } from '@trace-glow-internal/transport';
 import {
   Component,
   createContext,
@@ -15,7 +15,7 @@ import {
 import packageMetadata from '../package.json';
 
 /** 嵌入 Collector 事件信封的公开 React 包标识。 */
-const PACKAGE_IDENTITY = { name: '@trace-glow-sdk/react', version: packageMetadata.version } as const;
+const PACKAGE_IDENTITY = { name: '@trace-glow/react', version: packageMetadata.version } as const;
 
 /** React 端 TraceGlow 构造函数接受的统一浏览器配置。 */
 export interface TraceGlowConfig extends Omit<TelemetryClientConfig, 'transport' | 'sdk'> {
@@ -240,18 +240,18 @@ export function TraceGlowErrorBoundary(props: TraceGlowErrorBoundaryProps): Reac
 }
 
 /** 供高级 React 组装使用的浏览器埋点插件。 */
-export { BrowserPlugin } from '@trace-glow/browser';
+export { BrowserPlugin } from '@trace-glow-internal/browser';
 /** 供自定义 React 组装使用的共享上下文管理器。 */
-export { ContextManager } from '@trace-glow/context';
+export { ContextManager } from '@trace-glow-internal/context';
 /** 供高级 React 组装使用的运行时无关客户端。 */
-export { TelemetryClient } from '@trace-glow/core';
+export { TelemetryClient } from '@trace-glow-internal/core';
 /** 打包进 React 包的结构化 Logger 实现。 */
-export { Logger } from '@trace-glow/logger';
+export { Logger } from '@trace-glow-internal/logger';
 /** 受支持的浏览器投递 Transport。 */
-export { BeaconTransport, HttpTransport } from '@trace-glow/transport';
+export { BeaconTransport, HttpTransport } from '@trace-glow-internal/transport';
 /** 浏览器埋点选项协议。 */
-export type { BrowserPluginOptions } from '@trace-glow/browser';
+export type { BrowserPluginOptions } from '@trace-glow-internal/browser';
 /** 运行时无关的事件与客户端协议。 */
-export type { DebugOptions, EventInput, TelemetryClientConfig, TelemetryEvent } from '@trace-glow/core';
+export type { DebugOptions, EventInput, TelemetryClientConfig, TelemetryEvent } from '@trace-glow-internal/core';
 /** 结构化 Logger 选项协议。 */
-export type { LoggerOptions } from '@trace-glow/logger';
+export type { LoggerOptions } from '@trace-glow-internal/logger';

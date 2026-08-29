@@ -1,5 +1,5 @@
 {
-  "name": "@trace-glow-sdk/node",
+  "name": "@trace-glow/node",
   "version": "0.1.0",
   "description": "Trace Glow observability SDK for Node.js applications",
   "license": "MIT",

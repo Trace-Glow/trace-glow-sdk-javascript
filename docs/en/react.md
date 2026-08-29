@@ -3,7 +3,7 @@
 ## Install
 
 ```sh
-pnpm add @trace-glow-sdk/react
+pnpm add @trace-glow/react
 ```
 
 The package supports React 18 and 19. React is a peer dependency and is not
@@ -19,7 +19,7 @@ import {
   TraceGlow,
   TraceGlowErrorBoundary,
   TraceGlowProvider,
-} from '@trace-glow-sdk/react';
+} from '@trace-glow/react';
 
 const telemetry = new TraceGlow({
   endpoint: 'https://collector.example.com/v1/events',
@@ -51,7 +51,7 @@ component. React Error Boundaries do not catch server-rendering failures.
 `useTraceGlow()` returns the nearest Provider instance:
 
 ```tsx
-import { useTraceGlow } from '@trace-glow-sdk/react';
+import { useTraceGlow } from '@trace-glow/react';
 
 export function CheckoutButton() {
   const telemetry = useTraceGlow();

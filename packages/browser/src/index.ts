@@ -1,4 +1,4 @@
-import type { TelemetryClientApi, TelemetryPlugin } from '@trace-glow/core';
+import type { TelemetryClientApi, TelemetryPlugin } from '@trace-glow-internal/core';
 
 /** 浏览器自动埋点的功能开关与隐私控制。 */
 export interface BrowserPluginOptions {
@@ -76,7 +76,7 @@ function errorPayload(error: unknown): Record<string, unknown> {
 /** 安装并在之后恢复埋点的浏览器生命周期插件。 */
 export class BrowserPlugin implements TelemetryPlugin {
   /** 用于拒绝重复安装的私有工作区插件标识。 */
-  readonly name = '@trace-glow/browser';
+  readonly name = '@trace-glow-internal/browser';
   /** 按安装相反顺序执行的卸载栈。 */
   private readonly cleanups: Cleanup[] = [];
   /** 卸载时清除的当前客户端引用，以便进行垃圾回收。 */

@@ -1,5 +1,5 @@
 {
-  "name": "@trace-glow-sdk/browser",
+  "name": "@trace-glow/browser",
   "version": "0.1.0",
   "description": "Trace Glow observability SDK for browser applications",
   "license": "MIT",

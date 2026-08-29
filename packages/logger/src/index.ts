@@ -1,4 +1,4 @@
-import type { EventLevel, TelemetryClientApi, TelemetryContext } from '@trace-glow/core';
+import type { EventLevel, TelemetryClientApi, TelemetryContext } from '@trace-glow-internal/core';
 
 /** 用于常数时间最低级别过滤的数值严重度顺序。 */
 const PRIORITY: Record<EventLevel, number> = {

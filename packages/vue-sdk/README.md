@@ -1,11 +1,11 @@
-# @trace-glow-sdk/vue
+# @trace-glow/vue
 
 The public Trace Glow SDK package for Vue 3 applications. Internal workspace
 modules are bundled; Vue remains a peer dependency.
 
 ```ts
 import { createApp } from 'vue';
-import { TraceGlow } from '@trace-glow-sdk/vue';
+import { TraceGlow } from '@trace-glow/vue';
 import App from './App.vue';
 
 const app = createApp(App);

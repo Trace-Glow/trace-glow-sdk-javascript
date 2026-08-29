@@ -10,7 +10,7 @@ afterEach(() => {
 });
 
 /** 验证公开浏览器包专门暴露的行为。 */
-describe('@trace-glow-sdk/browser', () => {
+describe('@trace-glow/browser', () => {
   /** 确保事件信封标识公开包而不是私有内核。 */
   it('reports the public browser package identity', async () => {
     /** 由注入的全局 Fetch 替代实现捕获的 Collector 信封。 */
@@ -30,6 +30,6 @@ describe('@trace-glow-sdk/browser', () => {
     await telemetry.ready;
     telemetry.logger.info('identity');
     await telemetry.client.shutdown();
-    expect(envelope?.events[0]?.sdk.name).toBe('@trace-glow-sdk/browser');
+    expect(envelope?.events[0]?.sdk.name).toBe('@trace-glow/browser');
   });
 });

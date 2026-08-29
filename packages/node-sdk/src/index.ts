@@ -1,12 +1,12 @@
-import { ContextManager } from '@trace-glow/context';
-import { TelemetryClient, type TelemetryClientConfig } from '@trace-glow/core';
-import { Logger, type LoggerOptions } from '@trace-glow/logger';
-import { NodePlugin, NodeRequestContext, type NodePluginOptions } from '@trace-glow/node';
-import { HttpTransport } from '@trace-glow/transport';
+import { ContextManager } from '@trace-glow-internal/context';
+import { TelemetryClient, type TelemetryClientConfig } from '@trace-glow-internal/core';
+import { Logger, type LoggerOptions } from '@trace-glow-internal/logger';
+import { NodePlugin, NodeRequestContext, type NodePluginOptions } from '@trace-glow-internal/node';
+import { HttpTransport } from '@trace-glow-internal/transport';
 import packageMetadata from '../package.json';
 
 /** 嵌入 Collector 事件信封的公开 Node.js 包标识。 */
-const PACKAGE_IDENTITY = { name: '@trace-glow-sdk/node', version: packageMetadata.version } as const;
+const PACKAGE_IDENTITY = { name: '@trace-glow/node', version: packageMetadata.version } as const;
 
 /** Node.js 端 TraceGlow 构造函数接受的统一配置。 */
 export interface TraceGlowConfig extends Omit<TelemetryClientConfig, 'transport' | 'sdk'> {
@@ -54,11 +54,11 @@ export class TraceGlow {
 }
 
 /** 供自定义 Node.js 组装使用的共享上下文管理器。 */
-export { ContextManager } from '@trace-glow/context';
+export { ContextManager } from '@trace-glow-internal/context';
 /** 供高级 Node.js 组装使用的运行时无关客户端。 */
-export { TelemetryClient } from '@trace-glow/core';
+export { TelemetryClient } from '@trace-glow-internal/core';
 /** 打包进 Node.js 包的结构化 Logger 实现。 */
-export { Logger } from '@trace-glow/logger';
+export { Logger } from '@trace-glow-internal/logger';
 /** 受支持的 Node.js 插件和框架无关中间件适配器。 */
 export {
   NodePlugin,
@@ -67,12 +67,12 @@ export {
   createHttpMiddleware,
   createKoaMiddleware,
   createNestMiddleware,
-} from '@trace-glow/node';
+} from '@trace-glow-internal/node';
 /** 具备响应确认的 HTTP Collector Transport。 */
-export { HttpTransport } from '@trace-glow/transport';
+export { HttpTransport } from '@trace-glow-internal/transport';
 /** 运行时无关的事件与客户端协议。 */
-export type { DebugOptions, EventInput, TelemetryClientConfig, TelemetryEvent } from '@trace-glow/core';
+export type { DebugOptions, EventInput, TelemetryClientConfig, TelemetryEvent } from '@trace-glow-internal/core';
 /** 结构化 Logger 选项协议。 */
-export type { LoggerOptions } from '@trace-glow/logger';
+export type { LoggerOptions } from '@trace-glow-internal/logger';
 /** Node.js 埋点与中间件选项协议。 */
-export type { HttpMiddlewareOptions, NodePluginOptions } from '@trace-glow/node';
+export type { HttpMiddlewareOptions, NodePluginOptions } from '@trace-glow-internal/node';

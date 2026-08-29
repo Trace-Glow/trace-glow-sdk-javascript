@@ -10,7 +10,7 @@ afterEach(() => {
 });
 
 /** 验证公开 Node.js 包专门暴露的行为。 */
-describe('@trace-glow-sdk/node', () => {
+describe('@trace-glow/node', () => {
   /** 确保事件信封标识公开包而不是私有内核。 */
   it('reports the public Node.js package identity', async () => {
     /** 由注入的全局 Fetch 替代实现捕获的 Collector 信封。 */
@@ -30,6 +30,6 @@ describe('@trace-glow-sdk/node', () => {
     await telemetry.ready;
     telemetry.logger.info('identity');
     await telemetry.client.shutdown();
-    expect(envelope?.events[0]?.sdk.name).toBe('@trace-glow-sdk/node');
+    expect(envelope?.events[0]?.sdk.name).toBe('@trace-glow/node');
   });
 });

@@ -16,13 +16,13 @@ const workspaceSource = (relativePath: string): string =>
 export default defineConfig({
   resolve: {
     alias: {
-      '@trace-glow/core': workspaceSource('./packages/core/src/index.ts'),
-      '@trace-glow/context': workspaceSource('./packages/context/src/index.ts'),
-      '@trace-glow/transport': workspaceSource('./packages/transport/src/index.ts'),
-      '@trace-glow/logger': workspaceSource('./packages/logger/src/index.ts'),
-      '@trace-glow/browser': workspaceSource('./packages/browser/src/index.ts'),
-      '@trace-glow/vue': workspaceSource('./packages/vue/src/index.ts'),
-      '@trace-glow/node': workspaceSource('./packages/node/src/index.ts'),
+      '@trace-glow-internal/core': workspaceSource('./packages/core/src/index.ts'),
+      '@trace-glow-internal/context': workspaceSource('./packages/context/src/index.ts'),
+      '@trace-glow-internal/transport': workspaceSource('./packages/transport/src/index.ts'),
+      '@trace-glow-internal/logger': workspaceSource('./packages/logger/src/index.ts'),
+      '@trace-glow-internal/browser': workspaceSource('./packages/browser/src/index.ts'),
+      '@trace-glow-internal/vue': workspaceSource('./packages/vue/src/index.ts'),
+      '@trace-glow-internal/node': workspaceSource('./packages/node/src/index.ts'),
     },
   },
   test: {

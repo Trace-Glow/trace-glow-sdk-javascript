@@ -1,5 +1,5 @@
 {
-  "name": "@trace-glow/node",
+  "name": "@trace-glow-internal/node",
   "private": true,
   "version": "0.1.0",
   "description": "Node.js monitoring and web framework adapters for Trace Glow",
@@ -17,6 +17,6 @@
     "clean": "rimraf dist",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
-  "dependencies": { "@trace-glow/core": "workspace:*" },
+  "dependencies": { "@trace-glow-internal/core": "workspace:*" },
   "devDependencies": { "@types/node": "^22.18.0" }
 }

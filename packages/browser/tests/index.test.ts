@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { BrowserPlugin } from '../src/index';
-import type { EventInput, TelemetryClientApi } from '@trace-glow/core';
+import type { EventInput, TelemetryClientApi } from '@trace-glow-internal/core';
 
 /** 测试期间替换的浏览器窗口对象，记录插件安装的事件监听器。 */
 const ORIGINAL_WINDOW = globalThis.window;

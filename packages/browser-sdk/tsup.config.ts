@@ -5,11 +5,11 @@ import { defineConfig } from 'tsup';
  * Bundle 可防止 npm 消费者解析有意不发布的私有实现包。
  */
 const INTERNAL_MODULES = [
-  '@trace-glow/browser',
-  '@trace-glow/context',
-  '@trace-glow/core',
-  '@trace-glow/logger',
-  '@trace-glow/transport',
+  '@trace-glow-internal/browser',
+  '@trace-glow-internal/context',
+  '@trace-glow-internal/core',
+  '@trace-glow-internal/logger',
+  '@trace-glow-internal/transport',
 ];
 
 /**

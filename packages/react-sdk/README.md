@@ -1,4 +1,4 @@
-# @trace-glow-sdk/react
+# @trace-glow/react
 
 The public Trace Glow SDK for React 18 and 19 applications. It bundles the
 browser telemetry implementation while keeping `react` as a peer dependency.
@@ -8,7 +8,7 @@ import {
   TraceGlow,
   TraceGlowErrorBoundary,
   TraceGlowProvider,
-} from '@trace-glow-sdk/react';
+} from '@trace-glow/react';
 
 const telemetry = new TraceGlow({
   endpoint: 'https://collector.example.com/v1/events',

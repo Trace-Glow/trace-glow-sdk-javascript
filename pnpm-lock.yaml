@@ -44,7 +44,7 @@ importers:
 
   packages/browser:
     dependencies:
-      '@trace-glow/core':
+      '@trace-glow-internal/core':
         specifier: workspace:*
         version: link:../core
 
@@ -52,7 +52,7 @@ importers:
 
   packages/context:
     dependencies:
-      '@trace-glow/core':
+      '@trace-glow-internal/core':
         specifier: workspace:*
         version: link:../core
 
@@ -60,13 +60,13 @@ importers:
 
   packages/logger:
     dependencies:
-      '@trace-glow/core':
+      '@trace-glow-internal/core':
         specifier: workspace:*
         version: link:../core
 
   packages/node:
     dependencies:
-      '@trace-glow/core':
+      '@trace-glow-internal/core':
         specifier: workspace:*
         version: link:../core
     devDependencies:
@@ -93,13 +93,13 @@ importers:
 
   packages/transport:
     dependencies:
-      '@trace-glow/core':
+      '@trace-glow-internal/core':
         specifier: workspace:*
         version: link:../core
 
   packages/vue:
     dependencies:
-      '@trace-glow/core':
+      '@trace-glow-internal/core':
         specifier: workspace:*
         version: link:../core
     devDependencies:

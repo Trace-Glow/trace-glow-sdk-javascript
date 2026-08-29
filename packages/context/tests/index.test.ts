@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { TelemetryClient, type TelemetryEvent, type Transport } from '@trace-glow/core';
+import { TelemetryClient, type TelemetryEvent, type Transport } from '@trace-glow-internal/core';
 import { ContextManager } from '../src/index';
 
 /** 验证共享遥测上下文与事件级上下文之间的优先级。 */

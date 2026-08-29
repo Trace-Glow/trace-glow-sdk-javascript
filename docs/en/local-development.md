@@ -28,25 +28,25 @@ can incorrectly register the workspace root package.
 In a browser application repository, link the browser package:
 
 ```sh
-pnpm link --global @trace-glow-sdk/browser
+pnpm link --global @trace-glow/browser
 ```
 
 In a React application repository, link the React package:
 
 ```sh
-pnpm link --global @trace-glow-sdk/react
+pnpm link --global @trace-glow/react
 ```
 
 In a Vue 3 application repository, link the Vue package:
 
 ```sh
-pnpm link --global @trace-glow-sdk/vue
+pnpm link --global @trace-glow/vue
 ```
 
 In a Node.js service repository, link the Node.js package:
 
 ```sh
-pnpm link --global @trace-glow-sdk/node
+pnpm link --global @trace-glow/node
 ```
 
 Re-run `pnpm build` in the SDK repository after source changes. The linked
@@ -56,10 +56,10 @@ its bundler caches package output.
 Remove the link in the consumer before reinstalling a registry version:
 
 ```sh
-pnpm unlink @trace-glow-sdk/browser
-pnpm unlink @trace-glow-sdk/react
-pnpm unlink @trace-glow-sdk/vue
-pnpm unlink @trace-glow-sdk/node
+pnpm unlink @trace-glow/browser
+pnpm unlink @trace-glow/react
+pnpm unlink @trace-glow/vue
+pnpm unlink @trace-glow/node
 pnpm install
 ```
 
@@ -74,16 +74,16 @@ test the exact npm package shape through tarballs:
 ```sh
 mkdir -p /tmp/trace-glow-packs
 pnpm build
-pnpm --filter '@trace-glow-sdk/*' pack --pack-destination /tmp/trace-glow-packs
+pnpm --filter '@trace-glow/*' pack --pack-destination /tmp/trace-glow-packs
 ```
 
 Install the relevant tarball in the consumer:
 
 ```sh
-pnpm add /tmp/trace-glow-packs/trace-glow-sdk-browser-0.1.0.tgz
-pnpm add /tmp/trace-glow-packs/trace-glow-sdk-react-0.1.0.tgz
-pnpm add /tmp/trace-glow-packs/trace-glow-sdk-vue-0.1.0.tgz
-pnpm add /tmp/trace-glow-packs/trace-glow-sdk-node-0.1.0.tgz
+pnpm add /tmp/trace-glow-packs/trace-glow-browser-0.1.0.tgz
+pnpm add /tmp/trace-glow-packs/trace-glow-react-0.1.0.tgz
+pnpm add /tmp/trace-glow-packs/trace-glow-vue-0.1.0.tgz
+pnpm add /tmp/trace-glow-packs/trace-glow-node-0.1.0.tgz
 ```
 
 Tarball testing verifies `exports`, declarations, bundled private modules, and
@@ -95,10 +95,10 @@ For consumers that use npm instead of pnpm, run `npm link` inside the built
 public package directory, then run one of these commands in the consumer:
 
 ```sh
-npm link @trace-glow-sdk/browser
-npm link @trace-glow-sdk/react
-npm link @trace-glow-sdk/vue
-npm link @trace-glow-sdk/node
+npm link @trace-glow/browser
+npm link @trace-glow/react
+npm link @trace-glow/vue
+npm link @trace-glow/node
 ```
 
 Do not use linked packages in CI or production deployments because links depend

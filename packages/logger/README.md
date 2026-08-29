@@ -1,3 +1,3 @@
-# @trace-glow/logger (private workspace package)
+# @trace-glow-internal/logger (private workspace package)
 
 Structured, severity-filtered logging that emits Trace Glow log events.

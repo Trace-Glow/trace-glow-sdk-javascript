@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { EventInput, TelemetryClientApi } from '@trace-glow/core';
+import type { EventInput, TelemetryClientApi } from '@trace-glow-internal/core';
 import { Logger } from '../src/index';
 
 /** 验证严重级别过滤和不可变子字段继承。 */
