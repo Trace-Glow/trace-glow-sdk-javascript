@@ -5,10 +5,10 @@
   "fixed": [],
   "linked": [
     [
-      "@trace-glow-sdk/browser",
-      "@trace-glow-sdk/react",
-      "@trace-glow-sdk/vue",
-      "@trace-glow-sdk/node"
+      "@trace-glow/browser",
+      "@trace-glow/react",
+      "@trace-glow/vue",
+      "@trace-glow/node"
     ]
   ],
   "access": "public",

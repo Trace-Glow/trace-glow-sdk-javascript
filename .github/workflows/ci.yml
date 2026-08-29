@@ -23,7 +23,7 @@ jobs:
       - run: pnpm test
       - run: pnpm build
       - run: mkdir -p "${RUNNER_TEMP}/trace-glow-packs"
-      - run: pnpm --filter '@trace-glow-sdk/*' pack --pack-destination "${RUNNER_TEMP}/trace-glow-packs"
+      - run: pnpm --filter '@trace-glow/*' pack --pack-destination "${RUNNER_TEMP}/trace-glow-packs"
       - uses: actions/upload-artifact@v4
         with:
           name: npm-packages
