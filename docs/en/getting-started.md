@@ -28,7 +28,18 @@ import {
   TraceGlowErrorBoundary,
   TraceGlowProvider,
 } from '@trace-glow-sdk/react';
+```
 
+The React package uses the same configuration and automatic browser instrumentation as the browser package. See the [React integration guide](react.md) for Provider, Hook, ErrorBoundary, SSR, lifecycle, and privacy behavior.
+
+## Vue 3
+
+```ts
+import { createApp } from 'vue';
+import { TraceGlow } from '@trace-glow-sdk/vue';
+import App from './App.vue';
+
+const app = createApp(App);
 const telemetry = new TraceGlow({
   apiKey: 'browser-write-key',
   endpoint: 'https://collector.example.com/v1/events',
@@ -36,18 +47,14 @@ const telemetry = new TraceGlow({
   environment: 'production',
 });
 
-root.render(
-  <TraceGlowProvider telemetry={telemetry}>
-    <TraceGlowErrorBoundary fallback={<p>Something went wrong.</p>}>
-      <App />
-    </TraceGlowErrorBoundary>
-  </TraceGlowProvider>,
-);
+app.use(telemetry);
+app.mount('#app');
 ```
 
-The React package uses the same configuration and automatic browser
-instrumentation as the browser package. See the [React integration guide](react.md)
-for Provider, Hook, ErrorBoundary, SSR, lifecycle, and privacy behavior.
+Construction starts browser instrumentation immediately. `app.use(telemetry)`
+adds Vue component error capture and preserves any error handler already
+configured on the app. Call `telemetry.client.shutdown()` to restore the handler
+and flush queued events during a controlled teardown.
 
 ## Node.js
 
@@ -77,7 +84,7 @@ process.on('SIGTERM', async () => {
 
 ### Common client options
 
-All public packages expose `new TraceGlow(config)`. Common option names are
+All four public packages expose `new TraceGlow(config)`. Common option names are
 identical; only the fields inside `instrumentation` are runtime-specific.
 
 | Option | Type | Required / default | Purpose |
@@ -97,7 +104,7 @@ identical; only the fields inside `instrumentation` are runtime-specific.
 | `debug` | `DebugOptions` | Disabled | Controls opt-in local diagnostic output without replacing Collector delivery. |
 | `onInternalError` | `(error: Error) => void` | Optional | Receives isolated SDK or transport diagnostics. Exceptions thrown by this callback are suppressed. |
 | `onDrop` | `(count, reason) => void` | Optional | Reports events discarded because of `queue_full`, `sampled`, `invalid`, or `oversized`. |
-| `instrumentation` | `BrowserPluginOptions` or `NodePluginOptions` | Optional | Controls runtime-specific instrumentation while keeping the outer configuration shape identical. React uses the browser options. |
+| `instrumentation` | `BrowserPluginOptions` or `NodePluginOptions` | Optional | Controls runtime-specific instrumentation while keeping the outer configuration shape identical; browser, React, and Vue use the browser options. |
 | `logger` | `LoggerOptions` | Optional | Sets the default log severity, context, and fields. |
 
 All numeric limits except retry delays must be positive integers. An invalid
@@ -143,6 +150,7 @@ leave it disabled in production.
 ### Browser options
 
 Pass these fields through the `instrumentation` property of the browser or React package.
+Pass these fields through the `instrumentation` property of the browser or Vue package.
 
 | Option | Type | Default | Purpose |
 | --- | --- | --- | --- |
@@ -182,6 +190,26 @@ Pass these fields through the `instrumentation` property of the Node.js package.
 | `processErrors` | `boolean` | `true` | Observes uncaught exceptions through `uncaughtExceptionMonitor` without preventing Node.js from exiting normally. |
 | `unhandledRejections` | `boolean` | `false` | Adds an `unhandledRejection` listener. It is opt-in because adding the listener changes Node.js default process behavior. |
 
+### Vue integration
+
+The Vue package accepts the browser `instrumentation` options above. Vue-specific
+error capture is installed through `app.use(telemetry)` and does not require a
+separate configuration object. It emits `vue.exception` events with these
+payload fields:
+
+| Field | Type | Purpose |
+| --- | --- | --- |
+| `name` | `string` | JavaScript Error class name when Vue receives an Error instance. |
+| `message` | `string` | Error message, or a safe fallback for non-Error thrown values. |
+| `stack` | `string` | Optional JavaScript stack supplied by the Error instance. |
+| `info` | `string` | Vue's error-source description, such as a render or setup function. |
+| `component` | `string` | Optional explicit component name from the public component instance. |
+
+The integration does not inspect component props, reactive state, rendered DOM,
+or arbitrary non-Error thrown objects. If the app already has an error handler,
+Trace Glow calls it after capture. Shutdown restores it unless the app replaced
+the handler after installation.
+
 ### Logger options
 
 Pass these fields through the `logger` property.
@@ -212,6 +240,9 @@ independent child logger with additional fixed fields.
 All runtime classes expose `client`, `context`, `logger`, and `ready`. The
 Node.js class additionally exposes `requestContext`; React also provides a
 Provider, Hook, and ErrorBoundary around the same handles.
+All runtime classes expose `client`, `context`, `logger`, and `ready`. The Vue
+class additionally exposes `vue` and implements Vue's Plugin `install(app)`
+protocol. The Node.js class additionally exposes `requestContext`.
 
 | API | Parameter purpose |
 | --- | --- |
@@ -223,6 +254,7 @@ Provider, Hook, and ErrorBoundary around the same handles.
 | `client.capture(input)` | Queues a manual event. `type` and `name` are required; `level` defaults to `info`; `timestamp`, event-local `context`, and `payload` are optional. |
 | `client.flush()` | Waits for pending processing and attempts immediate delivery of the current queue. |
 | `client.shutdown()` | Stops collection, removes instrumentation, and performs a final flush. |
+| `install(app)` / `app.use(telemetry)` | Vue package only. Installs idempotent component error capture while preserving the app's existing error handler. |
 | `ready` | Promise that resolves after plugin setup. Await it when application startup must not proceed before initialization completes. |
 
 ## Custom composition

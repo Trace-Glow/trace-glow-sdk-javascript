@@ -20,9 +20,11 @@ the event envelope defined here.
 | `@trace-glow/transport` | Fetch HTTP, gzip, and browser Beacon delivery | private, bundled |
 | `@trace-glow/logger` | structured logger and severity filtering | private, bundled |
 | `@trace-glow/browser` | errors, rejected promises, resource failures, performance, fetch and XHR | private, bundled |
+| `@trace-glow/vue` | Vue application error-handler installation, delegation and teardown | private, bundled |
 | `@trace-glow/node` | process failures, runtime metrics, HTTP middleware and framework adapters | private, bundled |
 | `@trace-glow-sdk/browser` | self-contained public browser SDK | public npm package |
 | `@trace-glow-sdk/react` | browser SDK with React Provider, Hook, and ErrorBoundary | public npm package; React peer |
+| `@trace-glow-sdk/vue` | self-contained public Vue 3 SDK; Vue is a peer dependency | public npm package |
 | `@trace-glow-sdk/node` | self-contained public Node.js SDK | public npm package |
 
 Dependencies point inward: runtime plugins may depend on core, but core never
@@ -78,11 +80,13 @@ entire host process budget.
 
 ## Release strategy
 
-The workspace uses pnpm and Changesets. The three public packages are versioned as
+The workspace uses pnpm and Changesets. The four public packages are versioned as
 a linked group during the initial contract-development period. Each public
 package publishes ESM, CommonJS, bundled declarations, source maps, and only its
 `dist` and documentation. CI must run `typecheck`, `test`, `build`, and pack all
-three public packages to a temporary directory before npm publishing with provenance.
+four public packages to a temporary directory before npm publishing with provenance.
+`dist` and documentation. CI must run `typecheck`, `test`, `build`, and pack all three
+public packages to a temporary directory before npm publishing with provenance.
 
 ## Delivery phases
 
@@ -90,6 +94,7 @@ three public packages to a temporary directory before npm publishing with proven
 
 - Stable event and plugin contracts
 - Browser error/performance/network collection
+- Vue component error collection with existing-handler delegation
 - Node process/runtime collection and HTTP middleware
 - Context, structured logging, HTTP/Beacon transport
 - Bounded batching, sampling, retry, shutdown and tests

@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-Collect browser, React, and Node.js errors, runtime signals, HTTP timing, and structured
+Collect browser, React, Vue, and Node.js errors, runtime signals, HTTP timing, and structured
 logs, then deliver them to a Trace Glow collector through a bounded,
 failure-isolated pipeline.
 
@@ -19,9 +19,9 @@ failure-isolated pipeline.
 
 ## Why Trace Glow
 
-- **One package per runtime.** Install the browser, React, or Node.js SDK; shared
+- **One package per runtime.** Install the browser, React, Vue, or Node.js SDK; shared
   implementation modules are bundled and never become consumer dependencies.
-- **One constructor everywhere.** Browser, React, and Node.js applications start
+- **One constructor everywhere.** Browser, React, Vue, and Node.js applications start
   with `new TraceGlow(config)`, with runtime-specific choices isolated under
   `instrumentation`.
 - **Useful defaults.** Error collection, runtime instrumentation, structured
@@ -46,6 +46,8 @@ pnpm add @trace-glow-sdk/browser
 
 # React applications
 pnpm add @trace-glow-sdk/react
+# Vue 3 applications
+pnpm add @trace-glow-sdk/vue
 
 # Node.js services
 pnpm add @trace-glow-sdk/node
@@ -83,7 +85,21 @@ import {
   TraceGlowErrorBoundary,
   TraceGlowProvider,
 } from '@trace-glow-sdk/react';
+```
 
+The React package includes all browser instrumentation and reports component
+errors as `react.component_error`. React 18 or 19 is required as a peer
+dependency. See the [React integration guide](docs/en/react.md) for hooks,
+fallback rendering, reset behavior, and lifecycle ownership.
+
+### Vue 3
+
+```ts
+import { createApp } from 'vue';
+import { TraceGlow } from '@trace-glow-sdk/vue';
+import App from './App.vue';
+
+const app = createApp(App);
 const telemetry = new TraceGlow({
   endpoint: 'https://collector.example.com/v1/events',
   apiKey: 'browser-write-key',
@@ -91,19 +107,12 @@ const telemetry = new TraceGlow({
   environment: 'production',
 });
 
-root.render(
-  <TraceGlowProvider telemetry={telemetry}>
-    <TraceGlowErrorBoundary fallback={<p>Something went wrong.</p>}>
-      <App />
-    </TraceGlowErrorBoundary>
-  </TraceGlowProvider>,
-);
+app.use(telemetry);
+app.mount('#app');
 ```
 
-The React package includes all browser instrumentation and reports component
-errors as `react.component_error`. React 18 or 19 is required as a peer
-dependency. See the [React integration guide](docs/en/react.md) for hooks,
-fallback rendering, reset behavior, and lifecycle ownership.
+Browser instrumentation starts during construction. `app.use(telemetry)` adds
+Vue component error capture while preserving an existing app error handler.
 
 ### Node.js
 
@@ -143,7 +152,7 @@ for every option, default value, callback, and context API. The equivalent
 [Chinese reference](docs/zh-CN/getting-started.md#配置参数说明) is maintained in
 parallel.
 
-For local event inspection, enable the same debug option in either runtime:
+For local event inspection, enable the same debug option in any runtime:
 
 ```ts
 const telemetry = new TraceGlow({
@@ -167,6 +176,9 @@ details.
 | React | All browser signals plus component errors captured by `TraceGlowErrorBoundary` |
 | Node.js | Uncaught exception monitoring, CPU, memory, event-loop delay, uptime, and HTTP request timing through middleware |
 | All runtimes | Structured severity-filtered logs, user/tag/extra context, release/environment metadata, and correlation IDs |
+| Vue 3 | Browser instrumentation plus component render, setup, lifecycle, watcher, directive, and event-handler errors observed by Vue |
+| Node.js | Uncaught exception monitoring, CPU, memory, event-loop delay, uptime, and HTTP request timing through middleware |
+| All | Structured severity-filtered logs, user/tag/extra context, release/environment metadata, and correlation IDs |
 
 Node.js unhandled rejection observation is opt-in because installing that
 listener changes default process behavior. URL query collection is also opt-in
@@ -188,16 +200,17 @@ the client-generated event ID; the SDK does not claim exactly-once delivery.
 
 ## Packages
 
-Three packages are public:
+Four packages are public:
 
 | Package | Runtime | Description |
 | --- | --- | --- |
 | [`@trace-glow-sdk/browser`](packages/browser-sdk) | Modern browsers | Self-contained browser SDK with instrumentation, context, logging, and HTTP/Beacon transports |
 | [`@trace-glow-sdk/react`](packages/react-sdk) | React 18/19 | Browser SDK plus Provider, Hook, and component ErrorBoundary; React remains a peer dependency |
+| [`@trace-glow-sdk/vue`](packages/vue-sdk) | Vue 3 | Self-contained Vue SDK with browser instrumentation and component error capture; Vue remains a peer dependency |
 | [`@trace-glow-sdk/node`](packages/node-sdk) | Node.js 18+ | Self-contained server SDK with process metrics, request context, logging, and HTTP/framework middleware |
 
 The packages under `packages/core`, `packages/context`, `packages/transport`,
-`packages/logger`, `packages/browser`, and `packages/node` are private
+`packages/logger`, `packages/browser`, `packages/vue`, and `packages/node` are private
 implementation boundaries. They are bundled into the public JavaScript and
 declaration output and must not be installed directly.
 
@@ -213,6 +226,7 @@ ownership, read the [architecture guide](docs/en/architecture.md).
   Applications targeting older browsers must provide the required transpilation
   and polyfills.
 - All public packages provide ESM, CommonJS, source maps, and TypeScript
+- All four public packages provide ESM, CommonJS, source maps, and TypeScript
   declarations.
 
 ## Development
@@ -234,7 +248,7 @@ for accepted types and examples.
 
 For consumer-app debugging, use the documented
 [local linking and tarball workflows](docs/en/local-development.md). Publishing
-uses Changesets and linked versions for the three public packages; see the
+uses Changesets and linked versions for the four public packages; see the
 [publishing guide](docs/en/publishing.md) before preparing a release.
 
 Repository changes must follow [AGENTS.md](AGENTS.md), including synchronized

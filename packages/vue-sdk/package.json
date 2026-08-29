@@ -1,0 +1,22 @@
+{
+  "name": "@trace-glow-sdk/vue",
+  "version": "0.1.0",
+  "description": "Trace Glow observability SDK for Vue 3 applications",
+  "license": "MIT",
+  "sideEffects": false,
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js", "require": "./dist/index.cjs" } },
+  "files": ["dist", "README.md"],
+  "publishConfig": { "access": "public", "provenance": true },
+  "engines": { "node": ">=18" },
+  "peerDependencies": { "vue": "^3.3.0" },
+  "devDependencies": { "vue": "^3.5.0" },
+  "scripts": {
+    "build": "tsup --config tsup.config.ts",
+    "clean": "rimraf dist",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  }
+}
