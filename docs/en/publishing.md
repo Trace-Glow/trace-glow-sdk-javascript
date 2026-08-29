@@ -13,9 +13,20 @@
 ## Creating a release
 
 Run `pnpm changeset`, select the affected packages, and commit the generated
-markdown file with the code change. On `main`, the release workflow maintains a
-version pull request. Merging that pull request builds, tests, and publishes the
-linked package versions with npm provenance.
+markdown file with the code change. Before publishing, update package versions
+and changelogs, commit the result, then create and push a version tag:
+
+```sh
+pnpm version-packages
+git add .
+git commit -m "chore: version packages"
+git tag v0.1.0
+git push origin main --follow-tags
+```
+
+Pushing a `v*` tag triggers the release workflow. It builds and tests the
+workspace, then runs `changeset publish` to publish the linked package versions
+with npm provenance.
 
 Private `@trace-glow-internal/*` modules are bundled rather than published. A change to a
 private module must still include a Changeset for every public package whose
