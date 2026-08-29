@@ -22,14 +22,21 @@ the event envelope defined here.
 | `@trace-glow/browser` | errors, rejected promises, resource failures, performance, fetch and XHR | private, bundled |
 | `@trace-glow/node` | process failures, runtime metrics, HTTP middleware and framework adapters | private, bundled |
 | `@trace-glow-sdk/browser` | self-contained public browser SDK | public npm package |
+| `@trace-glow-sdk/react` | browser SDK with React Provider, Hook, and ErrorBoundary | public npm package; React peer |
 | `@trace-glow-sdk/node` | self-contained public Node.js SDK | public npm package |
 
 Dependencies point inward: runtime plugins may depend on core, but core never
-imports a runtime plugin. Both public packages expose the same `TraceGlow` class
+imports a runtime plugin. All public packages expose the same `TraceGlow` class
 and common configuration shape, while their package entry points and runtime
 bundles remain isolated. The public packages bundle their private implementation
 modules and declarations, so their npm tarballs have no runtime dependency on
 unpublished workspace packages.
+
+The React package follows the browser isolation boundary and bundles the same
+private browser modules. React is externalized and declared as a peer dependency
+so Context and Hooks always use the consuming application's single React
+instance. `TraceGlowProvider` only distributes an existing SDK instance; it does
+not create or shut one down during React StrictMode remounts.
 
 ## Event envelope
 
@@ -71,11 +78,11 @@ entire host process budget.
 
 ## Release strategy
 
-The workspace uses pnpm and Changesets. The two public packages are versioned as
+The workspace uses pnpm and Changesets. The three public packages are versioned as
 a linked group during the initial contract-development period. Each public
 package publishes ESM, CommonJS, bundled declarations, source maps, and only its
-`dist` and documentation. CI must run `typecheck`, `test`, `build`, and pack both
-public packages to a temporary directory before npm publishing with provenance.
+`dist` and documentation. CI must run `typecheck`, `test`, `build`, and pack all
+three public packages to a temporary directory before npm publishing with provenance.
 
 ## Delivery phases
 

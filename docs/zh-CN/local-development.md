@@ -4,11 +4,13 @@
 
 ## 使用 pnpm link 快速迭代
 
-在本仓库中构建公开包，并将两个包注册到 pnpm 全局链接存储：
+在本仓库中构建公开包，并将三个包注册到 pnpm 全局链接存储：
 
 ```sh
 pnpm build
 cd packages/browser-sdk
+pnpm link --global
+cd ../react-sdk
 pnpm link --global
 cd ../node-sdk
 pnpm link --global
@@ -23,6 +25,12 @@ cd ../..
 pnpm link --global @trace-glow-sdk/browser
 ```
 
+在 React 应用仓库中链接 React 包：
+
+```sh
+pnpm link --global @trace-glow-sdk/react
+```
+
 在 Node.js 服务仓库中链接 Node.js 包：
 
 ```sh
@@ -35,11 +43,12 @@ SDK 源码发生变化后，需要在 SDK 仓库中重新运行 `pnpm build`。�
 
 ```sh
 pnpm unlink @trace-glow-sdk/browser
+pnpm unlink @trace-glow-sdk/react
 pnpm unlink @trace-glow-sdk/node
 pnpm install
 ```
 
-消费项目只需要移除自己实际使用的包。这里同时列出两个命令仅供参考。
+消费项目只需要移除自己实际使用的包。这里同时列出三个命令仅供参考。
 
 ## 使用 tarball 做发布形态验证
 
@@ -55,6 +64,7 @@ pnpm --filter '@trace-glow-sdk/*' pack --pack-destination /tmp/trace-glow-packs
 
 ```sh
 pnpm add /tmp/trace-glow-packs/trace-glow-sdk-browser-0.1.0.tgz
+pnpm add /tmp/trace-glow-packs/trace-glow-sdk-react-0.1.0.tgz
 pnpm add /tmp/trace-glow-packs/trace-glow-sdk-node-0.1.0.tgz
 ```
 
@@ -66,6 +76,7 @@ Tarball 测试可以验证 `exports`、类型声明、私有模块内联结果�
 
 ```sh
 npm link @trace-glow-sdk/browser
+npm link @trace-glow-sdk/react
 npm link @trace-glow-sdk/node
 ```
 

@@ -6,7 +6,8 @@
   "linked": [
     [
       "@trace-glow-sdk/browser",
-      "@trace-glow-sdk/node"
+      "@trace-glow-sdk/node",
+      "@trace-glow-sdk/react"
     ]
   ],
   "access": "public",

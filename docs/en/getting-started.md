@@ -20,6 +20,35 @@ telemetry.logger.info('checkout_started', { cartSize: 3 });
 The constructor starts automatically. Call `telemetry.client.shutdown()` during a
 controlled teardown when the environment provides one.
 
+## React
+
+```tsx
+import {
+  TraceGlow,
+  TraceGlowErrorBoundary,
+  TraceGlowProvider,
+} from '@trace-glow-sdk/react';
+
+const telemetry = new TraceGlow({
+  apiKey: 'browser-write-key',
+  endpoint: 'https://collector.example.com/v1/events',
+  projectId: 'web-store',
+  environment: 'production',
+});
+
+root.render(
+  <TraceGlowProvider telemetry={telemetry}>
+    <TraceGlowErrorBoundary fallback={<p>Something went wrong.</p>}>
+      <App />
+    </TraceGlowErrorBoundary>
+  </TraceGlowProvider>,
+);
+```
+
+The React package uses the same configuration and automatic browser
+instrumentation as the browser package. See the [React integration guide](react.md)
+for Provider, Hook, ErrorBoundary, SSR, lifecycle, and privacy behavior.
+
 ## Node.js
 
 ```ts
@@ -48,7 +77,7 @@ process.on('SIGTERM', async () => {
 
 ### Common client options
 
-Both public packages expose `new TraceGlow(config)`. Common option names are
+All public packages expose `new TraceGlow(config)`. Common option names are
 identical; only the fields inside `instrumentation` are runtime-specific.
 
 | Option | Type | Required / default | Purpose |
@@ -68,7 +97,7 @@ identical; only the fields inside `instrumentation` are runtime-specific.
 | `debug` | `DebugOptions` | Disabled | Controls opt-in local diagnostic output without replacing Collector delivery. |
 | `onInternalError` | `(error: Error) => void` | Optional | Receives isolated SDK or transport diagnostics. Exceptions thrown by this callback are suppressed. |
 | `onDrop` | `(count, reason) => void` | Optional | Reports events discarded because of `queue_full`, `sampled`, `invalid`, or `oversized`. |
-| `instrumentation` | `BrowserPluginOptions` or `NodePluginOptions` | Optional | Controls runtime-specific instrumentation while keeping the outer configuration shape identical. |
+| `instrumentation` | `BrowserPluginOptions` or `NodePluginOptions` | Optional | Controls runtime-specific instrumentation while keeping the outer configuration shape identical. React uses the browser options. |
 | `logger` | `LoggerOptions` | Optional | Sets the default log severity, context, and fields. |
 
 All numeric limits except retry delays must be positive integers. An invalid
@@ -88,7 +117,7 @@ events by event ID.
 
 ### Debug options
 
-Pass these fields through the `debug` property in either public package.
+Pass these fields through the `debug` property in any public package.
 
 | Option | Type | Default | Purpose |
 | --- | --- | --- | --- |
@@ -113,7 +142,7 @@ leave it disabled in production.
 
 ### Browser options
 
-Pass these fields through the `instrumentation` property of the browser package.
+Pass these fields through the `instrumentation` property of the browser or React package.
 
 | Option | Type | Default | Purpose |
 | --- | --- | --- | --- |
@@ -180,8 +209,9 @@ independent child logger with additional fixed fields.
 
 ## Returned handles and context parameters
 
-Both runtime classes expose `client`, `context`, `logger`, and `ready`. The
-Node.js class additionally exposes `requestContext`.
+All runtime classes expose `client`, `context`, `logger`, and `ready`. The
+Node.js class additionally exposes `requestContext`; React also provides a
+Provider, Hook, and ErrorBoundary around the same handles.
 
 | API | Parameter purpose |
 | --- | --- |
@@ -197,7 +227,7 @@ Node.js class additionally exposes `requestContext`.
 
 ## Custom composition
 
-The public packages re-export the supported lower-level APIs required for custom
+All public packages re-export the supported lower-level APIs required for custom
 composition. Construct `TelemetryClient` directly when custom transport,
 context, or plugin behavior is required. Register plugins before `start()` and
 use an event processor for final redaction. Private `@trace-glow/*` workspace
