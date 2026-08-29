@@ -17,9 +17,12 @@ Trace Glow 用于采集 JavaScript 监控事件和结构化日志。当采集服
 | `@trace-glow/browser` | 异常、Promise rejection、资源失败、性能、Fetch 和 XHR | 私有，打入公开包 |
 | `@trace-glow/node` | 进程异常、运行时指标、HTTP 中间件及框架适配器 | 私有，打入公开包 |
 | `@trace-glow-sdk/browser` | 自包含的浏览器 SDK | 公开 npm 包 |
+| `@trace-glow-sdk/react` | 带 React Provider、Hook 和 ErrorBoundary 的浏览器 SDK | 公开 npm 包；React peer dependency |
 | `@trace-glow-sdk/node` | 自包含的 Node.js SDK | 公开 npm 包 |
 
-依赖只能向内：运行时插件可以依赖 core，但 core 永远不能导入运行时插件。两个公开包暴露相同的 `TraceGlow` 类和公共配置结构，但包入口与运行时 Bundle 仍保持隔离。公开包会内联私有实现模块及其类型声明，因此 npm tarball 不会依赖未发布的 workspace 包。
+依赖只能向内：运行时插件可以依赖 core，但 core 永远不能导入运行时插件。所有公开包暴露相同的 `TraceGlow` 类和公共配置结构，但包入口与运行时 Bundle 仍保持隔离。公开包会内联私有实现模块及其类型声明，因此 npm tarball 不会依赖未发布的 workspace 包。
+
+React 包遵守浏览器隔离边界，并内联相同的私有浏览器模块。React 本身保持外部依赖并声明为 peer dependency，确保 Context 和 Hook 始终使用消费应用中的唯一 React 实例。`TraceGlowProvider` 只传递已经创建的 SDK 实例，不会在 React StrictMode 重复挂载期间创建或关闭实例。
 
 ## 事件信封
 
@@ -47,9 +50,9 @@ SDK 异常通过 `onInternalError` 报告，绝不能抛入宿主应用的事件
 
 ## 发布策略
 
-Workspace 使用 pnpm 和 Changesets。在初始契约开发阶段，两个公开包作为 linked group 统一升级版本。每个公开包发布 ESM、CommonJS、已内联的类型声明和 Source Map，并且只包含自身的 `dist` 和文档。
+Workspace 使用 pnpm 和 Changesets。在初始契约开发阶段，三个公开包作为 linked group 统一升级版本。每个公开包发布 ESM、CommonJS、已内联的类型声明和 Source Map，并且只包含自身的 `dist` 和文档。
 
-在带 npm provenance 的发布前，CI 必须执行 `typecheck`、`test`、`build`，并将两个公开包打包到临时目录进行检查。
+在带 npm provenance 的发布前，CI 必须执行 `typecheck`、`test`、`build`，并将三个公开包打包到临时目录进行检查。
 
 ## 交付阶段
 

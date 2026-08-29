@@ -19,6 +19,33 @@ telemetry.logger.info('checkout_started', { cartSize: 3 });
 
 构造函数会自动启动客户端。如果运行环境提供受控的销毁阶段，请调用 `telemetry.client.shutdown()`。
 
+## React
+
+```tsx
+import {
+  TraceGlow,
+  TraceGlowErrorBoundary,
+  TraceGlowProvider,
+} from '@trace-glow-sdk/react';
+
+const telemetry = new TraceGlow({
+  apiKey: 'browser-write-key',
+  endpoint: 'https://collector.example.com/v1/events',
+  projectId: 'web-store',
+  environment: 'production',
+});
+
+root.render(
+  <TraceGlowProvider telemetry={telemetry}>
+    <TraceGlowErrorBoundary fallback={<p>页面发生错误。</p>}>
+      <App />
+    </TraceGlowErrorBoundary>
+  </TraceGlowProvider>,
+);
+```
+
+React 包使用与浏览器包相同的配置和自动埋点。Provider、Hook、ErrorBoundary、SSR、生命周期和隐私行为请参阅 [React 集成文档](react.md)。
+
 ## Node.js
 
 ```ts
@@ -47,7 +74,7 @@ process.on('SIGTERM', async () => {
 
 ### 公共客户端参数
 
-两个公开包都使用 `new TraceGlow(config)`。公共参数名称完全一致，只有 `instrumentation` 内部字段因运行时而不同。
+所有公开包都使用 `new TraceGlow(config)`。公共参数名称完全一致，只有 `instrumentation` 内部字段因运行时而不同。
 
 | 参数 | 类型 | 必填项/默认值 | 作用 |
 | --- | --- | --- | --- |
@@ -66,7 +93,7 @@ process.on('SIGTERM', async () => {
 | `debug` | `DebugOptions` | 关闭 | 控制主动开启的本地调试输出，不会替代 Collector 投递。 |
 | `onInternalError` | `(error: Error) => void` | 可选 | 接收隔离后的 SDK 或 Transport 内部错误。该回调自身抛出的异常会被 SDK 吞掉。 |
 | `onDrop` | `(count, reason) => void` | 可选 | 报告因 `queue_full`、`sampled`、`invalid` 或 `oversized` 而被丢弃的事件。 |
-| `instrumentation` | `BrowserPluginOptions` 或 `NodePluginOptions` | 可选 | 控制运行时专属埋点，同时保持外层配置结构一致。 |
+| `instrumentation` | `BrowserPluginOptions` 或 `NodePluginOptions` | 可选 | 控制运行时专属埋点，同时保持外层配置结构一致；React 使用浏览器选项。 |
 | `logger` | `LoggerOptions` | 可选 | 设置默认日志级别、上下文和结构化字段。 |
 
 除重试延迟外，所有数值限制都必须是正整数。必填参数或资源限制不合法时，构造函数会抛出异常。
@@ -83,7 +110,7 @@ process.on('SIGTERM', async () => {
 
 ### Debug 参数
 
-两个公开包都通过 `debug` 属性传入以下字段。
+所有公开包都通过 `debug` 属性传入以下字段。
 
 | 参数 | 类型 | 默认值 | 作用 |
 | --- | --- | --- | --- |
@@ -104,7 +131,7 @@ const telemetry = new TraceGlow({
 
 ### 浏览器参数
 
-以下字段通过浏览器包的 `instrumentation` 属性传入。
+以下字段通过浏览器或 React 包的 `instrumentation` 属性传入。
 
 | 参数 | 类型 | 默认值 | 作用 |
 | --- | --- | --- | --- |
@@ -168,7 +195,7 @@ Logger 方法接受稳定的消息名称和可选结构化字段，例如 `logge
 
 ## 返回对象与上下文方法参数
 
-两个运行时类都会暴露 `client`、`context`、`logger` 和 `ready`，Node.js 类还会暴露 `requestContext`。
+所有运行时类都会暴露 `client`、`context`、`logger` 和 `ready`。Node.js 类还会暴露 `requestContext`；React 还围绕相同句柄提供 Provider、Hook 和 ErrorBoundary。
 
 | API | 参数作用 |
 | --- | --- |
@@ -184,4 +211,4 @@ Logger 方法接受稳定的消息名称和可选结构化字段，例如 `logge
 
 ## 自定义组装
 
-两个公开包会重新导出自定义组装所需的受支持底层 API。需要自定义 transport、上下文或插件行为时，可以直接构造 `TelemetryClient`。插件必须在 `start()` 之前注册；最终的数据脱敏应通过事件处理器完成。私有的 `@trace-glow/*` workspace 包属于实现细节，不会发布到 npm。
+所有公开包会重新导出自定义组装所需的受支持底层 API。需要自定义 transport、上下文或插件行为时，可以直接构造 `TelemetryClient`。插件必须在 `start()` 之前注册；最终的数据脱敏应通过事件处理器完成。私有的 `@trace-glow/*` workspace 包属于实现细节，不会发布到 npm。

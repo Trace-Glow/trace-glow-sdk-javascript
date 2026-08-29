@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-Collect browser and Node.js errors, runtime signals, HTTP timing, and structured
+Collect browser, React, and Node.js errors, runtime signals, HTTP timing, and structured
 logs, then deliver them to a Trace Glow collector through a bounded,
 failure-isolated pipeline.
 
@@ -19,9 +19,9 @@ failure-isolated pipeline.
 
 ## Why Trace Glow
 
-- **One package per runtime.** Install the browser or Node.js SDK; shared
+- **One package per runtime.** Install the browser, React, or Node.js SDK; shared
   implementation modules are bundled and never become consumer dependencies.
-- **One constructor everywhere.** Browser and Node.js applications both start
+- **One constructor everywhere.** Browser, React, and Node.js applications start
   with `new TraceGlow(config)`, with runtime-specific choices isolated under
   `instrumentation`.
 - **Useful defaults.** Error collection, runtime instrumentation, structured
@@ -43,6 +43,9 @@ Choose the package for the runtime you need:
 ```sh
 # Browser applications
 pnpm add @trace-glow-sdk/browser
+
+# React applications
+pnpm add @trace-glow-sdk/react
 
 # Node.js services
 pnpm add @trace-glow-sdk/node
@@ -71,6 +74,36 @@ telemetry.logger.info('checkout_started', { cartSize: 3 });
 
 Browser instrumentation starts automatically. The collector URL is excluded
 from Fetch and XHR instrumentation to prevent recursive telemetry.
+
+### React
+
+```tsx
+import {
+  TraceGlow,
+  TraceGlowErrorBoundary,
+  TraceGlowProvider,
+} from '@trace-glow-sdk/react';
+
+const telemetry = new TraceGlow({
+  endpoint: 'https://collector.example.com/v1/events',
+  apiKey: 'browser-write-key',
+  projectId: 'web-store',
+  environment: 'production',
+});
+
+root.render(
+  <TraceGlowProvider telemetry={telemetry}>
+    <TraceGlowErrorBoundary fallback={<p>Something went wrong.</p>}>
+      <App />
+    </TraceGlowErrorBoundary>
+  </TraceGlowProvider>,
+);
+```
+
+The React package includes all browser instrumentation and reports component
+errors as `react.component_error`. React 18 or 19 is required as a peer
+dependency. See the [React integration guide](docs/en/react.md) for hooks,
+fallback rendering, reset behavior, and lifecycle ownership.
 
 ### Node.js
 
@@ -131,8 +164,9 @@ details.
 | Runtime | Default instrumentation |
 | --- | --- |
 | Browser | JavaScript errors, unhandled Promise rejections, failed resources, supported LCP/layout-shift/long-task entries, Fetch, and XHR |
+| React | All browser signals plus component errors captured by `TraceGlowErrorBoundary` |
 | Node.js | Uncaught exception monitoring, CPU, memory, event-loop delay, uptime, and HTTP request timing through middleware |
-| Both | Structured severity-filtered logs, user/tag/extra context, release/environment metadata, and correlation IDs |
+| All runtimes | Structured severity-filtered logs, user/tag/extra context, release/environment metadata, and correlation IDs |
 
 Node.js unhandled rejection observation is opt-in because installing that
 listener changes default process behavior. URL query collection is also opt-in
@@ -154,11 +188,12 @@ the client-generated event ID; the SDK does not claim exactly-once delivery.
 
 ## Packages
 
-Only two packages are public:
+Three packages are public:
 
 | Package | Runtime | Description |
 | --- | --- | --- |
 | [`@trace-glow-sdk/browser`](packages/browser-sdk) | Modern browsers | Self-contained browser SDK with instrumentation, context, logging, and HTTP/Beacon transports |
+| [`@trace-glow-sdk/react`](packages/react-sdk) | React 18/19 | Browser SDK plus Provider, Hook, and component ErrorBoundary; React remains a peer dependency |
 | [`@trace-glow-sdk/node`](packages/node-sdk) | Node.js 18+ | Self-contained server SDK with process metrics, request context, logging, and HTTP/framework middleware |
 
 The packages under `packages/core`, `packages/context`, `packages/transport`,
@@ -177,7 +212,7 @@ ownership, read the [architecture guide](docs/en/architecture.md).
 - Browser output targets ES2022 and requires a modern Fetch-capable browser.
   Applications targeting older browsers must provide the required transpilation
   and polyfills.
-- Both public packages provide ESM, CommonJS, source maps, and TypeScript
+- All public packages provide ESM, CommonJS, source maps, and TypeScript
   declarations.
 
 ## Development
@@ -199,7 +234,7 @@ for accepted types and examples.
 
 For consumer-app debugging, use the documented
 [local linking and tarball workflows](docs/en/local-development.md). Publishing
-uses Changesets and linked versions for the two public packages; see the
+uses Changesets and linked versions for the three public packages; see the
 [publishing guide](docs/en/publishing.md) before preparing a release.
 
 Repository changes must follow [AGENTS.md](AGENTS.md), including synchronized

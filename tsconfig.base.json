@@ -12,7 +12,8 @@
       "@trace-glow/browser": ["packages/browser/src/index.ts"],
       "@trace-glow/node": ["packages/node/src/index.ts"],
       "@trace-glow-sdk/browser": ["packages/browser-sdk/src/index.ts"],
-      "@trace-glow-sdk/node": ["packages/node-sdk/src/index.ts"]
+      "@trace-glow-sdk/node": ["packages/node-sdk/src/index.ts"],
+      "@trace-glow-sdk/react": ["packages/react-sdk/src/index.ts"]
     },
     "strict": true,
     "declaration": true,

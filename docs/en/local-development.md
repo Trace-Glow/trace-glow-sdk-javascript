@@ -12,6 +12,8 @@ pnpm's global link store:
 pnpm build
 cd packages/browser-sdk
 pnpm link --global
+cd ../react-sdk
+pnpm link --global
 cd ../node-sdk
 pnpm link --global
 cd ../..
@@ -25,6 +27,12 @@ In a browser application repository, link the browser package:
 
 ```sh
 pnpm link --global @trace-glow-sdk/browser
+```
+
+In a React application repository, link the React package:
+
+```sh
+pnpm link --global @trace-glow-sdk/react
 ```
 
 In a Node.js service repository, link the Node.js package:
@@ -41,11 +49,12 @@ Remove the link in the consumer before reinstalling a registry version:
 
 ```sh
 pnpm unlink @trace-glow-sdk/browser
+pnpm unlink @trace-glow-sdk/react
 pnpm unlink @trace-glow-sdk/node
 pnpm install
 ```
 
-Only unlink the package used by that consumer. The two commands are shown
+Only unlink the package used by that consumer. The commands are shown
 together as a reference.
 
 ## Release-accurate testing with tarballs
@@ -63,6 +72,7 @@ Install the relevant tarball in the consumer:
 
 ```sh
 pnpm add /tmp/trace-glow-packs/trace-glow-sdk-browser-0.1.0.tgz
+pnpm add /tmp/trace-glow-packs/trace-glow-sdk-react-0.1.0.tgz
 pnpm add /tmp/trace-glow-packs/trace-glow-sdk-node-0.1.0.tgz
 ```
 
@@ -76,6 +86,7 @@ public package directory, then run one of these commands in the consumer:
 
 ```sh
 npm link @trace-glow-sdk/browser
+npm link @trace-glow-sdk/react
 npm link @trace-glow-sdk/node
 ```
 

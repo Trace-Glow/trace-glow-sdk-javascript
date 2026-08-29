@@ -12,10 +12,11 @@
 
 Trace Glow is a JavaScript observability SDK intended for public npm distribution. The broader observability system is a multi-repository project: SDK collection and delivery live here, while ingestion, storage, querying, the management platform, and alert evaluation belong in separate repositories.
 
-This repository is a TypeScript pnpm workspace. It publishes exactly two self-contained packages:
+This repository is a TypeScript pnpm workspace. It publishes exactly three public packages:
 
 - `@trace-glow-sdk/browser`: public browser SDK with all required private modules bundled.
 - `@trace-glow-sdk/node`: public Node.js SDK with all required private modules bundled.
+- `@trace-glow-sdk/react`: public React SDK with browser modules bundled and React kept as a peer dependency.
 
 The remaining packages are private workspace implementation modules:
 
@@ -30,7 +31,8 @@ The remaining packages are private workspace implementation modules:
 
 - Dependencies point inward. Runtime packages may depend on `core`; `core` must never import browser, Node.js, framework, or transport implementations.
 - Browser and Node.js entry points must remain isolated. Browser output must not reference `node:*` or `@trace-glow/node`.
-- Both public packages expose the same `new TraceGlow(config)` entry point and common configuration names. Keep runtime-only options under `instrumentation`; Node.js may additionally expose request-context capabilities.
+- React output follows the browser isolation boundary and must not reference `node:*` or `@trace-glow/node`; React itself must remain external as a peer dependency.
+- All public packages expose the same `new TraceGlow(config)` entry point and common configuration names. Keep runtime-only options under `instrumentation`; Node.js may additionally expose request-context capabilities and React may expose framework integration components and hooks.
 - Public package JavaScript and declarations must bundle private `@trace-glow/*` modules. Published package manifests must not declare runtime dependencies on private workspace packages.
 - SDK failures must not escape into host application control flow. Preserve bounded memory, bounded payloads, retry limits, teardown behavior, and final flushing.
 - Do not collect request/response bodies, cookies, authorization headers, URL query strings, fragments, or DOM text by default.
@@ -49,5 +51,5 @@ The remaining packages are private workspace implementation modules:
 - Before considering implementation complete, run `pnpm typecheck`, `pnpm test`, and `pnpm build`.
 - Preserve the `pre-push` hook and its `pnpm verify:push` entry point. Every push must pass linting, TypeScript checks, a complete build, and the unit test suite; keep the hook, scripts, and bilingual development documentation synchronized when these checks change.
 - Preserve the Conventional Commits `commit-msg` hook and Commitlint configuration. Use `type(optional-scope): description`, mark breaking public API changes with `!` or a `BREAKING CHANGE:` footer, and keep the bilingual development documentation synchronized with the accepted convention.
-- For publishing changes, pack both public packages to a temporary directory. Inspect file contents, bundled declarations, browser/Node isolation, and the absence of private runtime dependencies.
-- The repository uses Changesets and links the two public package versions. Do not publish to npm, create a release, or change the `@trace-glow-sdk` scope without explicit user authorization.
+- For publishing changes, pack all three public packages to a temporary directory. Inspect file contents, bundled declarations, browser/React/Node isolation, React peer dependency externalization, and the absence of private runtime dependencies.
+- The repository uses Changesets and links the three public package versions. Do not publish to npm, create a release, or change the `@trace-glow-sdk` scope without explicit user authorization.

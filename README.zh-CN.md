@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-采集浏览器与 Node.js 的错误、运行时信号、HTTP 耗时和结构化日志，并通过有界、故障隔离的管道将数据发送到 Trace Glow Collector。
+采集浏览器、React 与 Node.js 的错误、运行时信号、HTTP 耗时和结构化日志，并通过有界、故障隔离的管道将数据发送到 Trace Glow Collector。
 
 [快速开始](docs/zh-CN/getting-started.md) ·
 [架构方案](docs/zh-CN/architecture.md) ·
@@ -14,8 +14,8 @@
 
 ## 为什么选择 Trace Glow
 
-- **每个运行时只需一个包。** 根据需要安装浏览器或 Node.js SDK；共享实现模块会打包进公开产物，不会成为消费项目的依赖。
-- **所有环境使用同一个构造函数。** 浏览器和 Node.js 应用都通过 `new TraceGlow(config)` 启动，运行时专属差异只放在 `instrumentation` 中。
+- **每个运行时只需一个包。** 根据需要安装浏览器、React 或 Node.js SDK；共享实现模块会打包进公开产物，不会成为消费项目的依赖。
+- **所有环境使用同一个构造函数。** 浏览器、React 和 Node.js 应用都通过 `new TraceGlow(config)` 启动，运行时专属差异只放在 `instrumentation` 中。
 - **实用的默认配置。** 构造函数会统一组装错误采集、运行时埋点、结构化日志、上下文、批处理、采样、重试和最终刷新。
 - **有界资源开销。** 队列长度、事件大小、批次大小、重试次数和请求时长都有明确限制。
 - **保护宿主应用。** 运行时采集和发送失败不会进入应用控制流，并可通过可选诊断回调进行观察。
@@ -28,6 +28,9 @@
 ```sh
 # 浏览器应用
 pnpm add @trace-glow-sdk/browser
+
+# React 应用
+pnpm add @trace-glow-sdk/react
 
 # Node.js 服务
 pnpm add @trace-glow-sdk/node
@@ -55,6 +58,33 @@ telemetry.logger.info('checkout_started', { cartSize: 3 });
 ```
 
 浏览器埋点会自动启动。Collector URL 会自动从 Fetch 和 XHR 埋点中排除，防止递归产生遥测事件。
+
+### React
+
+```tsx
+import {
+  TraceGlow,
+  TraceGlowErrorBoundary,
+  TraceGlowProvider,
+} from '@trace-glow-sdk/react';
+
+const telemetry = new TraceGlow({
+  endpoint: 'https://collector.example.com/v1/events',
+  apiKey: 'browser-write-key',
+  projectId: 'web-store',
+  environment: 'production',
+});
+
+root.render(
+  <TraceGlowProvider telemetry={telemetry}>
+    <TraceGlowErrorBoundary fallback={<p>页面发生错误。</p>}>
+      <App />
+    </TraceGlowErrorBoundary>
+  </TraceGlowProvider>,
+);
+```
+
+React 包包含全部浏览器埋点，并通过 `TraceGlowErrorBoundary` 上报 `react.component_error` 组件错误。消费项目需要提供 React 18 或 19 peer dependency。Provider、Hook、fallback、reset 和生命周期所有权请参阅 [React 集成文档](docs/zh-CN/react.md)。
 
 ### Node.js
 
@@ -88,7 +118,7 @@ process.on('SIGTERM', async () => {
 
 完整选项、默认值、回调和上下文 API 请查看[配置参数说明](docs/zh-CN/getting-started.md#配置参数说明)，对应的[英文参数说明](docs/en/getting-started.md#configuration-reference)会同步维护。
 
-在本地查看事件时，两个运行时都使用同一个 debug 参数：
+在本地查看事件时，所有运行时都使用同一个 debug 参数：
 
 ```ts
 const telemetry = new TraceGlow({
@@ -106,8 +136,9 @@ const telemetry = new TraceGlow({
 | 运行时 | 默认埋点 |
 | --- | --- |
 | 浏览器 | JavaScript 错误、未处理的 Promise rejection、资源加载失败、浏览器支持的 LCP/布局偏移/长任务条目、Fetch 和 XHR |
+| React | 全部浏览器信号，以及由 `TraceGlowErrorBoundary` 捕获的组件错误 |
 | Node.js | 未捕获异常监控、CPU、内存、事件循环延迟、运行时间，以及通过中间件采集的 HTTP 请求耗时 |
-| 两者共有 | 带严重级别过滤的结构化日志、用户/标签/额外信息上下文、版本/环境元数据和关联 ID |
+| 所有运行时 | 带严重级别过滤的结构化日志、用户/标签/额外信息上下文、版本/环境元数据和关联 ID |
 
 Node.js 的未处理 rejection 监控需要主动启用，因为安装该监听器会改变进程默认行为。URL 查询参数采集同样需要主动启用，并且只应在完成隐私评估后使用。
 
@@ -126,11 +157,12 @@ Trace Glow 使用至少一次投递语义：
 
 ## 包结构
 
-只有两个包会公开发布：
+共有三个公开发布包：
 
 | 包 | 运行时 | 说明 |
 | --- | --- | --- |
 | [`@trace-glow-sdk/browser`](packages/browser-sdk) | 现代浏览器 | 自包含浏览器 SDK，提供埋点、上下文、日志以及 HTTP/Beacon Transport |
+| [`@trace-glow-sdk/react`](packages/react-sdk) | React 18/19 | 浏览器 SDK 加 Provider、Hook 和组件 ErrorBoundary；React 保持为 peer dependency |
 | [`@trace-glow-sdk/node`](packages/node-sdk) | Node.js 18+ | 自包含服务端 SDK，提供进程指标、请求上下文、日志以及 HTTP/框架中间件 |
 
 `packages/core`、`packages/context`、`packages/transport`、`packages/logger`、`packages/browser` 和 `packages/node` 属于私有实现边界。它们会打包进公开 JavaScript 和类型声明产物，不应由消费项目直接安装。
@@ -142,7 +174,7 @@ Trace Glow 使用至少一次投递语义：
 - 公开包目前处于 pre-1.0 版本阶段。公开 API 在 `1.0.0` 前可能发生变化；升级时请检查 Changesets 和发布说明。
 - 支持 Node.js `18` 及更高版本。
 - 浏览器产物以 ES2022 为目标，并要求使用支持 Fetch 的现代浏览器。面向旧浏览器的应用必须自行提供必要的转译和 Polyfill。
-- 两个公开包均提供 ESM、CommonJS、Source Map 和 TypeScript 类型声明。
+- 所有公开包均提供 ESM、CommonJS、Source Map 和 TypeScript 类型声明。
 
 ## 开发
 
@@ -157,7 +189,7 @@ pnpm verify:push
 
 Commit Message 遵循 Conventional Commits，并通过 `commit-msg` Hook 校验。允许的 type 和示例请参阅[本地开发文档](docs/zh-CN/local-development.md#commit-message-规范)。
 
-在消费项目中调试 SDK 时，请使用文档中的[本地链接和 tarball 流程](docs/zh-CN/local-development.md)。发布流程通过 Changesets 管理两个公开包的关联版本；准备发布前请阅读[发布流程](docs/zh-CN/publishing.md)。
+在消费项目中调试 SDK 时，请使用文档中的[本地链接和 tarball 流程](docs/zh-CN/local-development.md)。发布流程通过 Changesets 管理三个公开包的关联版本；准备发布前请阅读[发布流程](docs/zh-CN/publishing.md)。
 
 仓库改动必须遵守 [AGENTS.md](AGENTS.md)，包括同步维护英文与简体中文文档，以及使用简体中文代码注释。
 

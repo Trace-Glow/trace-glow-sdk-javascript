@@ -1,0 +1,29 @@
+{
+  "name": "@trace-glow-sdk/react",
+  "version": "0.1.0",
+  "description": "Trace Glow observability SDK for React applications",
+  "license": "MIT",
+  "sideEffects": false,
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js", "require": "./dist/index.cjs" } },
+  "files": ["dist", "README.md"],
+  "publishConfig": { "access": "public", "provenance": true },
+  "engines": { "node": ">=18" },
+  "peerDependencies": {
+    "react": ">=18.0.0 <20.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.24",
+    "@types/react-test-renderer": "^18.3.1",
+    "react": "^18.3.1",
+    "react-test-renderer": "^18.3.1"
+  },
+  "scripts": {
+    "build": "tsup --config tsup.config.ts",
+    "clean": "rimraf dist",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  }
+}
