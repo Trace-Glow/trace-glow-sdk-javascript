@@ -19,6 +19,7 @@ Trace Glow 用于采集 JavaScript 监控事件和结构化日志。当采集服
 | `@trace-glow-internal/node` | 进程异常、运行时指标、HTTP 中间件及框架适配器 | 私有，打入公开包 |
 | `@trace-glow/browser` | 自包含的浏览器 SDK | 公开 npm 包 |
 | `@trace-glow/react` | 带 React Provider、Hook 和 ErrorBoundary 的浏览器 SDK | 公开 npm 包；React peer dependency |
+| `@trace-glow/next` | Next.js 客户端 React 集成和 Node 服务端入口 | 公开 npm 包；Next.js 与 React peer dependency |
 | `@trace-glow/vue` | 自包含的 Vue 3 SDK；Vue 为 peer dependency | 公开 npm 包 |
 | `@trace-glow/node` | 自包含的 Node.js SDK | 公开 npm 包 |
 
@@ -52,9 +53,9 @@ SDK 异常通过 `onInternalError` 报告，绝不能抛入宿主应用的事件
 
 ## 发布策略
 
-Workspace 使用 pnpm 和 Changesets。在初始契约开发阶段，四个公开包作为 linked group 统一升级版本。每个公开包发布 ESM、CommonJS、已内联的类型声明和 Source Map，并且只包含自身的 `dist` 和文档。
+Workspace 使用 pnpm 和 Changesets。在初始契约开发阶段，五个公开包作为 linked group 统一升级版本。每个公开包发布 ESM、CommonJS、已内联的类型声明和 Source Map，并且只包含自身的 `dist` 和文档。
 
-在带 npm provenance 的发布前，CI 必须执行 `typecheck`、`test`、`build`，并将四个公开包打包到临时目录进行检查。
+在带 npm provenance 的发布前，CI 必须执行 `typecheck`、`test`、`build`，并将五个公开包打包到临时目录进行检查。
 
 ## 交付阶段
 

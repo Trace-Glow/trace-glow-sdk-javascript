@@ -4,7 +4,7 @@
 
 1. Confirm that the npm account or organization owns the `@trace-glow`
    scope. The public packages are `@trace-glow/browser`,
-   `@trace-glow/react`, `@trace-glow/vue`, and
+   `@trace-glow/react`, `@trace-glow/vue`, `@trace-glow/next`, and
    `@trace-glow/node`.
 2. Add an npm automation token as the repository secret `NPM_TOKEN`.
 3. Enable GitHub Actions to create pull requests and use npm trusted publishing
@@ -47,7 +47,7 @@ mkdir -p /tmp/trace-glow-packs
 pnpm --filter '@trace-glow/*' pack --pack-destination /tmp/trace-glow-packs
 ```
 
-Inspect all four public tarballs. Verify that browser, React, and Vue output do
+Inspect all five public tarballs. Verify that browser, React, Next, and Vue output do
 not reference Node built-ins, framework packages remain external peer
 dependencies, and no
 tarball declares runtime dependencies on private `@trace-glow-internal/*` workspace

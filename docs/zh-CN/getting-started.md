@@ -80,7 +80,7 @@ process.on('SIGTERM', async () => {
 
 ### 公共客户端参数
 
-四个公开包都使用 `new TraceGlow(config)`。公共参数名称完全一致，只有 `instrumentation` 内部字段因运行时而不同。
+五个公开包都使用 `new TraceGlow(config)`。公共参数名称完全一致，只有 `instrumentation` 内部字段因运行时而不同。
 
 | 参数 | 类型 | 必填项/默认值 | 作用 |
 | --- | --- | --- | --- |
@@ -240,4 +240,4 @@ Logger 方法接受稳定的消息名称和可选结构化字段，例如 `logge
 ## 自定义组装
 
 所有公开包会重新导出自定义组装所需的受支持底层 API。需要自定义 transport、上下文或插件行为时，可以直接构造 `TelemetryClient`。插件必须在 `start()` 之前注册；最终的数据脱敏应通过事件处理器完成。私有的 `@trace-glow/*` workspace 包属于实现细节，不会发布到 npm。
-四个公开包会重新导出自定义组装所需的受支持底层 API。需要自定义 transport、上下文或插件行为时，可以直接构造 `TelemetryClient`。插件必须在 `start()` 之前注册；最终的数据脱敏应通过事件处理器完成。私有的 `@trace-glow/*` workspace 包属于实现细节，不会发布到 npm。
+五个公开包会重新导出自定义组装所需的受支持底层 API。需要自定义 transport、上下文或插件行为时，可以直接构造 `TelemetryClient`。插件必须在 `start()` 之前注册；最终的数据脱敏应通过事件处理器完成。私有的 `@trace-glow/*` workspace 包属于实现细节，不会发布到 npm。

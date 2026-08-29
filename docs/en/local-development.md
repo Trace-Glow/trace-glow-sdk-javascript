@@ -14,6 +14,8 @@ cd packages/browser-sdk
 pnpm link --global
 cd ../react-sdk
 pnpm link --global
+cd ../next-sdk
+pnpm link --global
 cd ../vue-sdk
 pnpm link --global
 cd ../node-sdk
@@ -37,6 +39,12 @@ In a React application repository, link the React package:
 pnpm link --global @trace-glow/react
 ```
 
+In a Next.js application repository, link the Next.js package:
+
+```sh
+pnpm link --global @trace-glow/next
+```
+
 In a Vue 3 application repository, link the Vue package:
 
 ```sh
@@ -58,6 +66,7 @@ Remove the link in the consumer before reinstalling a registry version:
 ```sh
 pnpm unlink @trace-glow/browser
 pnpm unlink @trace-glow/react
+pnpm unlink @trace-glow/next
 pnpm unlink @trace-glow/vue
 pnpm unlink @trace-glow/node
 pnpm install
