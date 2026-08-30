@@ -121,6 +121,11 @@ hash, and the generated core TypeScript types. Do not edit those files by hand.
 The SDK tests validate a real `TelemetryClient` event against the snapshot, and
 `contracts:check` detects a changed Schema hash or stale generated output.
 
+The shared Agent context is different from the build snapshot. Agents must
+read `context/shared.md`, `context/repositories.json`, and the SDK context file
+directly from a pinned contracts commit through GitHub MCP or authenticated
+`gh api`; do not copy that context into this repository.
+
 ## Commit message convention
 
 The repository uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)

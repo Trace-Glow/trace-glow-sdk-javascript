@@ -108,6 +108,10 @@ TypeScript 生成类型。不要手工编辑这些文件。SDK 测试会使用�
 `TelemetryClient` 事件，`contracts:check` 会发现 Schema 哈希变化或过期的生成
 产物。
 
+共享 Agent 上下文与构建快照不同。Agent 必须通过 GitHub MCP 或已认证的
+`gh api`，直接从固定的 contracts commit 读取 `context/shared.md`、
+`context/repositories.json` 和 SDK 上下文文件；不要将这些上下文复制到本仓库。
+
 ## Commit Message 规范
 
 仓库采用 [Conventional Commits](https://www.conventionalcommits.org/zh-hans/v1.0.0/)，并通过 `commit-msg` Hook 校验每次提交。提交信息格式为：
