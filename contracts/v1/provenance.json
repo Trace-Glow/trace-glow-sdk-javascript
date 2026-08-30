@@ -1,0 +1,6 @@
+{
+  "repository": "https://github.com/Trace-Glow/trace-glow-contracts",
+  "schema": "schemas/v1/contracts.schema.json",
+  "version": 1,
+  "sha256": "eee686f85255a211f799b56f66a072a6561c385204af24a2b55a4d2b810de15b"
+}

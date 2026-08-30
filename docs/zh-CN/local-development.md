@@ -102,6 +102,26 @@ npm link @trace-glow/node
 
 不要在 CI 或生产部署中使用链接包，因为链接依赖当前机器的本地路径。
 
+## 共享协议同步
+
+[`trace-glow-contracts`](https://github.com/Trace-Glow/trace-glow-contracts) 仓库
+是事件传输结构的唯一事实来源。在该仓库完成兼容协议变更评审后，通过明确的
+本地来源路径同步 Schema：
+
+```sh
+pnpm contracts:sync -- /absolute/path/to/trace-glow-contracts
+pnpm contracts:check
+```
+
+同步命令会更新 `contracts/v1/contracts.schema.json`、来源哈希和 core 使用的
+TypeScript 生成类型。不要手工编辑这些文件。SDK 测试会使用快照校验真实
+`TelemetryClient` 事件，`contracts:check` 会发现 Schema 哈希变化或过期的生成
+产物。
+
+共享 Agent 上下文与构建快照不同。Agent 必须通过 GitHub MCP 或已认证的
+`gh api`，直接从固定的 contracts commit 读取 `context/shared.md`、
+`context/repositories.json` 和 SDK 上下文文件；不要将这些上下文复制到本仓库。
+
 ## Commit Message 规范
 
 仓库采用 [Conventional Commits](https://www.conventionalcommits.org/zh-hans/v1.0.0/)，并通过 `commit-msg` Hook 校验每次提交。提交信息格式为：
@@ -151,6 +171,7 @@ pnpm commitlint --edit .git/COMMIT_EDITMSG
 安装工作区依赖时会运行 `simple-git-hooks`，为仓库配置 `pre-push` Hook。在 Git 将提交发送到远程仓库前，Hook 会依次执行：
 
 ```sh
+pnpm contracts:check
 pnpm lint
 pnpm typecheck
 pnpm build

@@ -113,6 +113,28 @@ npm link @trace-glow/node
 Do not use linked packages in CI or production deployments because links depend
 on machine-local paths.
 
+## Shared contract synchronization
+
+The [`trace-glow-contracts`](https://github.com/Trace-Glow/trace-glow-contracts)
+repository is the source of truth for transported event structures. After a
+compatible contract change is reviewed there, synchronize its Schema into this
+repository with an explicit local source path:
+
+```sh
+pnpm contracts:sync -- /absolute/path/to/trace-glow-contracts
+pnpm contracts:check
+```
+
+Synchronization updates `contracts/v1/contracts.schema.json`, its provenance
+hash, and the generated core TypeScript types. Do not edit those files by hand.
+The SDK tests validate a real `TelemetryClient` event against the snapshot, and
+`contracts:check` detects a changed Schema hash or stale generated output.
+
+The shared Agent context is different from the build snapshot. Agents must
+read `context/shared.md`, `context/repositories.json`, and the SDK context file
+directly from a pinned contracts commit through GitHub MCP or authenticated
+`gh api`; do not copy that context into this repository.
+
 ## Commit message convention
 
 The repository uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
@@ -168,6 +190,7 @@ repository's `pre-push` hook. Before Git sends commits to a remote, the hook
 runs the following checks in order:
 
 ```sh
+pnpm contracts:check
 pnpm lint
 pnpm typecheck
 pnpm build

@@ -15,7 +15,8 @@ failure-isolated pipeline.
 > This repository contains the JavaScript collection and delivery SDK. A Trace
 > Glow collector endpoint is required to ingest its event envelope. Storage,
 > querying, the management platform, and alert evaluation live in separate
-> repositories.
+> repositories. Shared wire contracts are maintained in
+> [`trace-glow-contracts`](https://github.com/Trace-Glow/trace-glow-contracts).
 
 ## Why Trace Glow
 
@@ -242,9 +243,9 @@ pnpm install
 pnpm verify:push
 ```
 
-`pnpm verify:push` runs linting, strict TypeScript checks, every package build,
-and the unit test suite. Dependency installation configures the same command as
-a Git `pre-push` hook.
+`pnpm verify:push` checks the contract snapshot and generated types, then runs
+linting, strict TypeScript checks, every package build, and the unit test suite.
+Dependency installation configures the same command as a Git `pre-push` hook.
 
 Commit messages follow Conventional Commits and are checked by a `commit-msg`
 hook. See the [local development guide](docs/en/local-development.md#commit-message-convention)

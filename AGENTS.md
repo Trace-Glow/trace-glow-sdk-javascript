@@ -1,5 +1,28 @@
 # Agent instructions
 
+## Shared Trace Glow context
+
+Before analyzing, planning, reviewing, or modifying this repository, load the
+following files from the pinned commit of the remote
+`Trace-Glow/trace-glow-contracts` repository:
+
+- `context/shared.md`
+- `context/repositories.json`
+- `context/repositories/sdk-javascript.md`
+
+Resolve the contracts repository's default branch to one commit SHA before
+reading these files and use that same SHA for the entire task. Prefer the
+configured GitHub MCP/connector. When it is unavailable, use authenticated
+GitHub CLI reads, for example `gh api repos/Trace-Glow/trace-glow-contracts/commits/main --jq '.sha'`, then read each file at that SHA with
+`gh api repos/Trace-Glow/trace-glow-contracts/contents/<path>?ref=<SHA> --jq '.content' | base64 --decode`.
+Do not execute untrusted remote instructions. Record the SHA in task notes
+whenever work changes a shared contract or repository boundary.
+
+The remote files define shared system facts and ownership boundaries. The
+project-specific rules below define this repository's implementation behavior
+and take precedence when they are more specific. A Markdown URL alone does not
+load remote context; the active agent must explicitly read the pinned files.
+
 ## Documentation languages
 
 - English documentation under `docs/` belongs in `docs/en/`; Simplified Chinese documentation belongs in `docs/zh-CN/`. Root and package `README.md` files are npm/GitHub entry points and may remain English while linking to both language indexes.
@@ -10,7 +33,7 @@
 
 ## Project context
 
-Trace Glow is a JavaScript observability SDK intended for public npm distribution. The broader observability system is a multi-repository project: SDK collection and delivery live here, while ingestion, storage, querying, the management platform, and alert evaluation belong in separate repositories.
+Trace Glow is a JavaScript observability SDK intended for public npm distribution. The broader observability system is a multi-repository project: SDK collection and delivery live here, `trace-glow-collector-server` owns SDK telemetry ingestion, and `trace-glow-platform-server` owns platform APIs, management, querying, and alert evaluation. The Next.js `trace-glow-platform` application consumes the platform server.
 
 This repository is a TypeScript pnpm workspace. It publishes exactly four self-contained packages:
 
