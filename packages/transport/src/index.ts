@@ -1,4 +1,10 @@
-import type { SendOptions, TelemetryEvent, Transport } from '@trace-glow-internal/core';
+import type {
+  BeaconRequest,
+  Envelope,
+  SendOptions,
+  TelemetryEvent,
+  Transport,
+} from '@trace-glow-internal/core';
 
 /** 具备响应确认的 HTTP Collector 投递配置。 */
 export interface HttpTransportOptions {
@@ -16,17 +22,9 @@ export interface HttpTransportOptions {
   minimumCompressionBytes?: number;
 }
 
-/** 将客户端事件时间与批次发送时间分离的传输包装。 */
-interface Envelope {
-  /** 该批次序列化时的 ISO 8601 时间。 */
-  sentAt: string;
-  /** 本次投递尝试包含的不可变事件。 */
-  events: readonly TelemetryEvent[];
-}
-
-/** 创建一个 Collector 信封，且不克隆不可变事件对象。 */
+/** 创建符合共享协议的 Collector 信封，仅复制批次数组而不克隆事件对象。 */
 function envelope(events: readonly TelemetryEvent[]): Envelope {
-  return { sentAt: new Date().toISOString(), events };
+  return { sentAt: new Date().toISOString(), events: [...events] };
 }
 
 /**
@@ -127,8 +125,10 @@ export class BeaconTransport implements Transport {
   async send(events: readonly TelemetryEvent[], sendOptions?: SendOptions): Promise<void> {
     /** 从注入值或当前浏览器全局对象中选择的 Navigator 实现。 */
     const navigatorApi = this.options.navigator ?? globalThis.navigator;
-    /** 由于无法使用自定义请求 Header，Beacon Body 包含鉴权信息。 */
-    const body = JSON.stringify({ apiKey: this.options.apiKey, ...envelope(events) });
+    /** 由于无法使用自定义请求 Header，Beacon 请求使用共享 Body 鉴权协议。 */
+    const request: BeaconRequest = { apiKey: this.options.apiKey, ...envelope(events) };
+    /** JSON Body 保持与 Header 鉴权信封相同的事件顺序和发送时间语义。 */
+    const body = JSON.stringify(request);
     if (navigatorApi?.sendBeacon?.(this.options.endpoint, new Blob([body], { type: 'application/json' }))) {
       return;
     }

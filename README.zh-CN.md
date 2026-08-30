@@ -10,7 +10,7 @@
 [English documentation](docs/en/README.md)
 
 > [!IMPORTANT]
-> 本仓库只包含 JavaScript 数据采集与发送 SDK。SDK 需要 Trace Glow Collector 地址来接收事件信封。数据存储、查询、管理平台和告警评估位于其他独立仓库。
+> 本仓库只包含 JavaScript 数据采集与发送 SDK。SDK 需要 Trace Glow Collector 地址来接收事件信封。数据存储、查询、管理平台和告警评估位于其他独立仓库。共享传输协议由 [`trace-glow-contracts`](https://github.com/Trace-Glow/trace-glow-contracts) 维护。
 
 ## 为什么选择 Trace Glow
 
@@ -200,7 +200,7 @@ pnpm install
 pnpm verify:push
 ```
 
-`pnpm verify:push` 会运行 lint、TypeScript 严格检查、所有包的构建和单元测试。安装依赖时还会将同一命令配置为 Git `pre-push` Hook。
+`pnpm verify:push` 会先检查协议快照和生成类型，再运行 lint、TypeScript 严格检查、所有包的构建和单元测试。安装依赖时还会将同一命令配置为 Git `pre-push` Hook。
 
 Commit Message 遵循 Conventional Commits，并通过 `commit-msg` Hook 校验。允许的 type 和示例请参阅[本地开发文档](docs/zh-CN/local-development.md#commit-message-规范)。
 

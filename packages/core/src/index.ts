@@ -8,16 +8,21 @@ export { BoundedQueue } from './queue';
 export { withRetry } from './retry';
 /** 所有私有模块和公开 Bundle 共享的稳定类型协议。 */
 export type {
+  BeaconRequest,
   CorrelationContext,
   DebugOptions,
   EventInput,
   EventLevel,
   EventProcessor,
   EventType,
+  Envelope,
+  JsonArray,
+  JsonObject,
   JsonPrimitive,
   JsonValue,
   RetryConfig,
   SendOptions,
+  SdkIdentity,
   TelemetryClientApi,
   TelemetryClientConfig,
   TelemetryContext,

@@ -1,71 +1,26 @@
-/** 分配给遥测事件的严重级别，用于过滤和告警评估。 */
-export type EventLevel = 'debug' | 'info' | 'warn' | 'error' | 'fatal';
-/** 用于在 Collector 中路由记录的高层事件类别。 */
-export type EventType = 'monitor' | 'log' | 'internal';
-/** 无需自定义 JSON 编码即可表示的标量值。 */
-export type JsonPrimitive = string | number | boolean | null;
-/** 稳定传输协议允许的递归 JSON 值。 */
-export type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue };
+import type {
+  EventLevel,
+  EventType,
+  TelemetryContext,
+  TelemetryEvent,
+} from './generated/contracts';
 
-/** 经用户明确同意后附加到事件的可选应用身份信息。 */
-export interface UserContext {
-  /** 优先于个人信息使用的稳定内部用户标识。 */
-  id?: string;
-  /** 可选邮箱地址；调用方负责取得同意并进行脱敏。 */
-  email?: string;
-  /** 仅在明确提供时使用的可选显示名称。 */
-  username?: string;
-  /** 其他 JSON 安全的身份属性。 */
-  [key: string]: JsonValue | undefined;
-}
-
-/** 在异步或分布式任务之间关联事件的标识。 */
-export interface CorrelationContext {
-  /** 为后续兼容 OTLP 预留的分布式追踪标识。 */
-  traceId?: string;
-  /** 应用或中间件的请求标识。 */
-  requestId?: string;
-  /** 浏览器或应用会话标识。 */
-  sessionId?: string;
-}
-
-/** 在事件入队和传输前合并的上下文。 */
-export interface TelemetryContext extends CorrelationContext {
-  /** 明确提供的应用用户身份。 */
-  user?: UserContext;
-  /** 低基数、可搜索的标签。 */
-  tags?: Record<string, string>;
-  /** 不提升为索引字段的 JSON 安全诊断值。 */
-  extras?: Record<string, JsonValue>;
-}
-
-/** 发送到 Collector 的带版本事件信封。 */
-export interface TelemetryEvent {
-  /** SDK 与 Collector 滚动升级期间使用的传输模式版本。 */
-  schemaVersion: 1;
-  /** 客户端生成的标识，用于至少一次投递语义下的去重。 */
-  id: string;
-  /** 数据源生成的 ISO 8601 事件时间。 */
-  timestamp: string;
-  /** Collector 路由类别。 */
-  type: EventType;
-  /** 用于分组和查询的稳定事件名称。 */
-  name: string;
-  /** 用于过滤和告警的事件严重级别。 */
-  level: EventLevel;
-  /** 接收事件的租户内项目。 */
-  projectId: string;
-  /** 部署环境，例如 production 或 staging。 */
-  environment?: string;
-  /** 与事件关联的应用版本。 */
-  release?: string;
-  /** 用于兼容性诊断的 SDK 实现标识。 */
-  sdk: { name: string; version: string };
-  /** 可选的用户与关联元数据。 */
-  context?: TelemetryContext;
-  /** JSON 安全的事件专属数据。 */
-  payload: Record<string, JsonValue>;
-}
+/** 由 trace-glow-contracts 权威 Schema 生成的稳定传输协议类型。 */
+export type {
+  BeaconRequest,
+  CorrelationContext,
+  Envelope,
+  EventLevel,
+  EventType,
+  JsonArray,
+  JsonObject,
+  JsonPrimitive,
+  JsonValue,
+  SdkIdentity,
+  TelemetryContext,
+  TelemetryEvent,
+  UserContext,
+} from './generated/contracts';
 
 /** 由内核归一化后才成为事件的不可信采集输入。 */
 export interface EventInput {

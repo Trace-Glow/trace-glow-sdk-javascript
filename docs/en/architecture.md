@@ -7,15 +7,17 @@ changing application behavior when the collector is slow or unavailable. The
 SDK is designed for public npm distribution, tree shaking, browser/Node runtime
 isolation, and future OTLP interoperability.
 
-The first release covers SDK-side collection and delivery. Server ingestion,
-storage, querying, and alert evaluation are separate repositories and consume
-the event envelope defined here.
+The first release covers SDK-side collection and delivery. SDK telemetry is
+received by `trace-glow-collector-server`; platform APIs, management, querying,
+and alert evaluation are owned by `trace-glow-platform-server`. The Next.js
+`trace-glow-platform` application consumes the platform server. These services
+consume the event envelope defined by the [Trace Glow contracts repository](https://github.com/Trace-Glow/trace-glow-contracts).
 
 ## Package boundaries
 
 | Workspace package | Responsibility | Publication |
 | --- | --- | --- |
-| `@trace-glow-internal/core` | lifecycle, plugin API, event contract, bounded queue, batching, sampling, retry | private, bundled |
+| `@trace-glow-internal/core` | lifecycle, plugin API, generated contract types, bounded queue, batching, sampling, retry | private, bundled |
 | `@trace-glow-internal/context` | user, tags, environment, release and correlation context | private, bundled |
 | `@trace-glow-internal/transport` | Fetch HTTP, gzip, and browser Beacon delivery | private, bundled |
 | `@trace-glow-internal/logger` | structured logger and severity filtering | private, bundled |
@@ -42,14 +44,26 @@ not create or shut one down during React StrictMode remounts.
 
 ## Event envelope
 
+JSON Schema Draft 2020-12 in `trace-glow-contracts` is the source of truth for
+`TelemetryEvent`, standard `Envelope`, and `BeaconRequest`. This repository
+stores a versioned Schema snapshot under `contracts/v1/`, records its SHA-256
+source hash, and generates the core TypeScript types from that snapshot. The
+snapshot keeps SDK builds reproducible without introducing a runtime dependency
+on another repository.
+
+For AI work, the remote `trace-glow-contracts/context/` directory is the source
+of shared system context. The local `AGENTS.md` instructs agents to read one
+pinned contracts commit plus the SDK-specific context document before making
+cross-repository assumptions.
+
 Every event contains `id`, `timestamp`, `type`, `name`, `level`, SDK identity,
 project/environment/release metadata, optional correlation identifiers, and a
 JSON-safe payload. Unknown fields are not promoted to top-level indexed fields.
 
-The collector should deduplicate by `(projectId, id)`, use `timestamp` as event
+The Collector should deduplicate by `(projectId, id)`, use `timestamp` as event
 time, add a server receive time, reject oversized payloads, and treat delivery
-as at-least-once. The schema carries a version so the server can support rolling
-SDK upgrades.
+as at-least-once. The schema carries a version so
+`trace-glow-collector-server` can support rolling SDK upgrades.
 
 ## Lifecycle and failure model
 

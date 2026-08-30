@@ -4,13 +4,16 @@
 
 Trace Glow 用于采集 JavaScript 监控事件和结构化日志。当采集服务缓慢或不可用时，SDK 不应改变宿主应用的行为。SDK 面向 npm 公开发布，支持 Tree Shaking，隔离浏览器与 Node.js 运行时，并为未来兼容 OTLP 做好准备。
 
-首个版本覆盖 SDK 侧的数据采集与发送。服务端接入、存储、查询和告警计算位于独立仓库，并消费本文定义的事件信封。
+首个版本覆盖 SDK 侧的数据采集与发送。SDK 遥测数据由
+`trace-glow-collector-server` 接收；平台 API、管理、查询和告警计算由
+`trace-glow-platform-server` 负责；Next.js 应用 `trace-glow-platform` 消费
+平台服务。上述服务都消费 [Trace Glow contracts 仓库](https://github.com/Trace-Glow/trace-glow-contracts)定义的事件信封。
 
 ## 包边界
 
 | Workspace 包 | 职责 | 发布方式 |
 | --- | --- | --- |
-| `@trace-glow-internal/core` | 生命周期、插件 API、事件契约、有界队列、批处理、采样、重试 | 私有，打入公开包 |
+| `@trace-glow-internal/core` | 生命周期、插件 API、生成的协议类型、有界队列、批处理、采样、重试 | 私有，打入公开包 |
 | `@trace-glow-internal/context` | 用户、标签、环境、版本及关联上下文 | 私有，打入公开包 |
 | `@trace-glow-internal/transport` | Fetch HTTP、gzip 和浏览器 Beacon 发送 | 私有，打入公开包 |
 | `@trace-glow-internal/logger` | 结构化日志及日志级别过滤 | 私有，打入公开包 |
@@ -28,9 +31,19 @@ React 包遵守浏览器隔离边界，并内联相同的私有浏览器模块�
 
 ## 事件信封
 
+`trace-glow-contracts` 中的 JSON Schema Draft 2020-12 是 `TelemetryEvent`、标准
+`Envelope` 和 `BeaconRequest` 的唯一事实来源。本仓库在 `contracts/v1/` 保存
+版本化 Schema 快照及其来源 SHA-256，并根据该快照生成 core 使用的 TypeScript
+类型。快照使 SDK 构建保持可复现，同时不会增加对其他仓库的运行时依赖。
+
+对于 AI 工作，远程 `trace-glow-contracts/context/` 目录是系统公共上下文的
+来源。本地 `AGENTS.md` 要求 Agent 在做出跨仓库假设前，读取一个固定的
+contracts commit 以及 SDK 专属上下文文件。
+
 每个事件都包含 `id`、`timestamp`、`type`、`name`、`level`、SDK 标识、项目/环境/版本元数据、可选关联标识，以及可安全序列化为 JSON 的 payload。未知字段不会被提升为顶层索引字段。
 
-采集服务应使用 `(projectId, id)` 去重，以 `timestamp` 作为事件时间，补充服务端接收时间，拒绝过大的 payload，并将发送语义视为至少一次。Schema 带有版本号，使服务端能够支持 SDK 的滚动升级。
+`trace-glow-collector-server` 应使用 `(projectId, id)` 去重，以 `timestamp`
+作为事件时间，补充服务端接收时间，拒绝过大的 payload，并将发送语义视为至少一次。Schema 带有版本号，使采集服务能够支持 SDK 的滚动升级。
 
 ## 生命周期与故障模型
 

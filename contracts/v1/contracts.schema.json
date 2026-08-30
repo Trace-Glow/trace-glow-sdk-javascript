@@ -1,0 +1,240 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.trace-glow.dev/v1/contracts.schema.json",
+  "title": "TraceGlowContracts",
+  "description": "Trace Glow v1 传输协议的聚合代码生成入口。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["telemetryEvent", "envelope", "beaconRequest"],
+  "properties": {
+    "telemetryEvent": { "$ref": "#/$defs/TelemetryEvent" },
+    "envelope": { "$ref": "#/$defs/Envelope" },
+    "beaconRequest": { "$ref": "#/$defs/BeaconRequest" }
+  },
+  "$defs": {
+    "EventLevel": {
+      "description": "用于过滤、聚合和告警的事件严重级别。",
+      "type": "string",
+      "enum": ["debug", "info", "warn", "error", "fatal"]
+    },
+    "EventType": {
+      "description": "Collector 用于路由记录的高层事件类别。",
+      "type": "string",
+      "enum": ["monitor", "log", "internal"]
+    },
+    "JsonPrimitive": {
+      "description": "无需自定义编码即可传输的 JSON 标量值。",
+      "anyOf": [
+        { "type": "string" },
+        { "type": "number" },
+        { "type": "boolean" },
+        { "type": "null" }
+      ]
+    },
+    "JsonValue": {
+      "description": "协议允许递归表示的任意 JSON 值。",
+      "anyOf": [
+        { "$ref": "#/$defs/JsonPrimitive" },
+        { "$ref": "#/$defs/JsonArray" },
+        { "$ref": "#/$defs/JsonObject" }
+      ]
+    },
+    "JsonArray": {
+      "description": "由 JSON 值组成的递归数组。",
+      "type": "array",
+      "items": { "$ref": "#/$defs/JsonValue" }
+    },
+    "JsonObject": {
+      "description": "键为字符串、值为 JSON 值的递归对象。",
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/JsonValue" }
+    },
+    "UserContext": {
+      "description": "经应用明确提供、附加到事件的可选用户上下文。",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "优先于个人信息使用的稳定内部用户标识。",
+          "type": "string"
+        },
+        "email": {
+          "description": "仅在应用取得同意并完成必要脱敏后提供的邮箱。",
+          "type": "string"
+        },
+        "username": {
+          "description": "仅在应用明确提供时传输的显示名称。",
+          "type": "string"
+        }
+      },
+      "additionalProperties": { "$ref": "#/$defs/JsonValue" }
+    },
+    "CorrelationContext": {
+      "description": "用于关联异步、请求或分布式工作的标识。",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "traceId": {
+          "description": "为分布式追踪兼容保留的追踪标识。",
+          "type": "string"
+        },
+        "requestId": {
+          "description": "应用或中间件生成的请求标识。",
+          "type": "string"
+        },
+        "sessionId": {
+          "description": "浏览器或应用会话标识。",
+          "type": "string"
+        }
+      }
+    },
+    "TelemetryContext": {
+      "description": "在事件进入队列和传输前合并的上下文。",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "traceId": {
+          "description": "为分布式追踪兼容保留的追踪标识。",
+          "type": "string"
+        },
+        "requestId": {
+          "description": "应用或中间件生成的请求标识。",
+          "type": "string"
+        },
+        "sessionId": {
+          "description": "浏览器或应用会话标识。",
+          "type": "string"
+        },
+        "user": { "$ref": "#/$defs/UserContext" },
+        "tags": {
+          "description": "适合索引和过滤的低基数字符串标签。",
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "extras": {
+          "description": "无需提升为索引字段的 JSON 诊断值。",
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/JsonValue" }
+        }
+      }
+    },
+    "SdkIdentity": {
+      "description": "用于 Collector 兼容性诊断的 SDK 实现标识。",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": {
+          "description": "生成事件的 SDK 包名。",
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "description": "生成事件的 SDK 包版本。",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "TelemetryEvent": {
+      "description": "发送到 Collector 的版本化遥测事件。",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "id",
+        "timestamp",
+        "type",
+        "name",
+        "level",
+        "projectId",
+        "sdk",
+        "payload"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "description": "SDK 和 Collector 滚动升级期间使用的协议主版本。",
+          "type": "integer",
+          "enum": [1]
+        },
+        "id": {
+          "description": "客户端生成、供至少一次投递去重使用的事件标识。",
+          "type": "string",
+          "minLength": 1
+        },
+        "timestamp": {
+          "description": "数据源生成的 ISO 8601 事件时间。",
+          "type": "string",
+          "format": "date-time"
+        },
+        "type": { "$ref": "#/$defs/EventType" },
+        "name": {
+          "description": "用于分组和查询的稳定事件名称。",
+          "type": "string",
+          "minLength": 1
+        },
+        "level": { "$ref": "#/$defs/EventLevel" },
+        "projectId": {
+          "description": "接收事件的租户内项目标识。",
+          "type": "string",
+          "minLength": 1
+        },
+        "environment": {
+          "description": "可选部署环境，例如 production 或 staging。",
+          "type": "string"
+        },
+        "release": {
+          "description": "与事件关联的可选应用版本。",
+          "type": "string"
+        },
+        "sdk": { "$ref": "#/$defs/SdkIdentity" },
+        "context": { "$ref": "#/$defs/TelemetryContext" },
+        "payload": {
+          "description": "事件专属的 JSON 安全数据。",
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/JsonValue" }
+        }
+      }
+    },
+    "Envelope": {
+      "description": "使用 Header 鉴权的标准批量事件请求。",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sentAt", "events"],
+      "properties": {
+        "sentAt": {
+          "description": "批次完成序列化时的 ISO 8601 时间。",
+          "type": "string",
+          "format": "date-time"
+        },
+        "events": {
+          "description": "本次投递尝试包含的有序事件。",
+          "type": "array",
+          "items": { "$ref": "#/$defs/TelemetryEvent" }
+        }
+      }
+    },
+    "BeaconRequest": {
+      "description": "无法设置自定义 Header 时使用的浏览器 Beacon 批量请求。",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["apiKey", "sentAt", "events"],
+      "properties": {
+        "apiKey": {
+          "description": "仅用于 Beacon Body 鉴权的项目写入密钥。",
+          "type": "string",
+          "minLength": 1
+        },
+        "sentAt": {
+          "description": "批次完成序列化时的 ISO 8601 时间。",
+          "type": "string",
+          "format": "date-time"
+        },
+        "events": {
+          "description": "本次投递尝试包含的有序事件。",
+          "type": "array",
+          "items": { "$ref": "#/$defs/TelemetryEvent" }
+        }
+      }
+    }
+  }
+}
