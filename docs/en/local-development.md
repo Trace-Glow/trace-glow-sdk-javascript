@@ -121,7 +121,7 @@ compatible contract change is reviewed there, synchronize its Schema into this
 repository with an explicit local source path:
 
 ```sh
-pnpm contracts:sync -- /absolute/path/to/trace-glow-contracts
+pnpm contracts:sync -- ../trace-glow-contracts
 pnpm contracts:check
 ```
 
@@ -132,8 +132,11 @@ The SDK tests validate a real `TelemetryClient` event against the snapshot, and
 
 The shared Agent context is different from the build snapshot. Agents must
 read `context/shared.md`, `context/repositories.json`, and the SDK context file
-directly from a pinned contracts commit through GitHub MCP or authenticated
-`gh api`; do not copy that context into this repository.
+from the pinned commit in the sibling local `../trace-glow-contracts` checkout.
+Before a task, use ordinary Git to check for remote updates by comparing its
+local `HEAD` with `origin/main` after `git -C ../trace-glow-contracts fetch
+origin`; do not change the pinned commit during the task and do not copy that
+context into this repository.
 
 ## Commit message convention
 
