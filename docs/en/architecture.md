@@ -62,6 +62,11 @@ Every event contains `id`, `timestamp`, `type`, `name`, `level`, SDK identity,
 project/environment/release metadata, optional correlation identifiers, and a
 JSON-safe payload. Unknown fields are not promoted to top-level indexed fields.
 
+Trace events may additionally carry `spanId`, `parentSpanId`, `spanKind`,
+`spanStatus`, `startTimestamp`, `durationMs`, and bounded JSON-safe attributes.
+The SDK exposes explicit spans first; automatic runtime propagation is added by
+later tracing integration work.
+
 The Collector should deduplicate by `(projectId, id)`, use `timestamp` as event
 time, add a server receive time, reject oversized payloads, and treat delivery
 as at-least-once. The schema carries a version so

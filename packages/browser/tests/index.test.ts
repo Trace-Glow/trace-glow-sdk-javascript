@@ -28,6 +28,8 @@ function createClient(events: EventInput[]): TelemetryClientApi {
     capture: (event) => events.push(event),
     addEventProcessor: () => () => undefined,
     flush: async () => undefined,
+    /** 浏览器插件测试不创建 Span，因此使用不可达替身。 */
+    startSpan: () => { throw new Error('startSpan is not used by this test'); },
   };
 }
 

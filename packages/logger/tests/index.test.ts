@@ -13,6 +13,8 @@ describe('Logger', () => {
       capture: (input) => { inputs.push(input); },
       addEventProcessor: () => () => undefined,
       flush: async () => undefined,
+      /** Logger 测试不创建 Span，因此使用不可达替身。 */
+      startSpan: () => { throw new Error('startSpan is not used by this test'); },
     };
     /** Logger 阈值隐藏 debug，固定字段用于模拟服务元数据。 */
     const logger = new Logger(client, { minimumLevel: 'info', fields: { service: 'api' } });

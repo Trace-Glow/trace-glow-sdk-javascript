@@ -9,7 +9,7 @@
  * This interface was referenced by `TraceGlowContracts`'s JSON-Schema
  * via the `definition` "EventType".
  */
-export type EventType = "monitor" | "log" | "internal";
+export type EventType = "monitor" | "log" | "trace" | "internal";
 /**
  * 用于过滤、聚合和告警的事件严重级别。
  *
@@ -38,6 +38,20 @@ export type JsonPrimitive = string | number | boolean | null;
  * via the `definition` "JsonArray".
  */
 export type JsonArray = JsonValue[];
+/**
+ * 用于描述 span 在调用链中的角色。
+ *
+ * This interface was referenced by `TraceGlowContracts`'s JSON-Schema
+ * via the `definition` "SpanKind".
+ */
+export type SpanKind = "internal" | "server" | "client" | "producer" | "consumer";
+/**
+ * Span 完成时的标准状态。
+ *
+ * This interface was referenced by `TraceGlowContracts`'s JSON-Schema
+ * via the `definition` "SpanStatus".
+ */
+export type SpanStatus = "unset" | "ok" | "error";
 
 /**
  * Trace Glow v1 传输协议的聚合代码生成入口。
@@ -86,6 +100,30 @@ export interface TelemetryEvent {
   release?: string;
   sdk: SdkIdentity;
   context?: TelemetryContext;
+  /**
+   * 当前 span 的 16 字节十六进制标识。
+   */
+  spanId?: string;
+  /**
+   * 父 span 的 16 字节十六进制标识。
+   */
+  parentSpanId?: string;
+  spanKind?: SpanKind;
+  spanStatus?: SpanStatus;
+  /**
+   * Span 开始时间。
+   */
+  startTimestamp?: string;
+  /**
+   * Span 持续时间，单位为毫秒。
+   */
+  durationMs?: number;
+  /**
+   * Span 的 JSON 安全属性，禁止请求体和敏感 Header。
+   */
+  attributes?: {
+    [k: string]: JsonValue;
+  };
   /**
    * 事件专属的 JSON 安全数据。
    */

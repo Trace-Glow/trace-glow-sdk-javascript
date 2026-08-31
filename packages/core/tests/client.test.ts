@@ -127,4 +127,32 @@ describe('TelemetryClient', () => {
     expect(onInternalError).toHaveBeenCalledWith(expect.objectContaining({ message: 'console unavailable' }));
     expect(transport.send).toHaveBeenCalledOnce();
   });
+
+  /** 确保显式 Span 在结束时生成具有父子关系的 trace 事件。 */
+  it('captures explicit parent and child spans', async () => {
+    /** 保存结束后的 Span 事件，避免依赖 Collector。 */
+    const sent: TelemetryEvent[] = [];
+    /** 内存 Transport 保留事件顺序。 */
+    const transport: Transport = { send: async (events) => { sent.push(...events); } };
+    /** 使用默认资源边界的客户端。 */
+    const client = new TelemetryClient({ projectId: 'test', transport });
+    /** 根 Span 创建新的 trace。 */
+    const parent = client.startSpan('checkout', { kind: 'server' });
+    /** 子 Span 继承 trace 并记录父 Span 标识。 */
+    const child = client.startSpan('database', { parent, kind: 'client' });
+    child.setAttribute('db.system', 'postgresql').setStatus('ok').end();
+    parent.setStatus('ok').end();
+    await client.shutdown();
+    expect(sent[0]).toMatchObject({
+      type: 'trace',
+      name: 'database',
+      spanId: child.spanId,
+      parentSpanId: parent.spanId,
+      context: { traceId: parent.traceId },
+      spanKind: 'client',
+      spanStatus: 'ok',
+      attributes: { 'db.system': 'postgresql' },
+    });
+    expect(sent[1]?.context?.traceId).toBe(parent.traceId);
+  });
 });
