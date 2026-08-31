@@ -1,4 +1,4 @@
-import type { TelemetryClientApi, TelemetryPlugin } from '@trace-glow-internal/core';
+import { normalizeError, type TelemetryClientApi, type TelemetryPlugin } from '@trace-glow-internal/core';
 import type { App, ComponentPublicInstance } from 'vue';
 
 /** Vue 应用配置公开的错误处理器签名。 */
@@ -17,12 +17,6 @@ interface VueInstallation {
  * @param error - Vue errorHandler 接收到的未知异常值。
  * @returns 仅包含错误名称、消息和可选堆栈的结构化对象。
  */
-function errorPayload(error: unknown): Record<string, unknown> {
-  if (error instanceof Error) {
-    return { name: error.name, message: error.message, stack: error.stack };
-  }
-  return { message: typeof error === 'string' ? error : 'Unknown Vue error' };
-}
 
 /**
  * 尽力读取组件定义名称，不访问 props、响应式状态或 DOM。
@@ -80,7 +74,7 @@ export class VuePlugin implements TelemetryPlugin {
         name: 'vue.exception',
         level: 'error',
         payload: {
-          ...errorPayload(error),
+          ...normalizeError(error),
           info,
           ...(component ? { component } : {}),
         },

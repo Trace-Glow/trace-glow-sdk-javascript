@@ -1,4 +1,4 @@
-import type { TelemetryClientApi, TelemetryPlugin } from '@trace-glow-internal/core';
+import { normalizeError, type TelemetryClientApi, type TelemetryPlugin } from '@trace-glow-internal/core';
 
 /** 浏览器自动埋点的功能开关与隐私控制。 */
 export interface BrowserPluginOptions {
@@ -66,12 +66,6 @@ function safeUrl(value: string, includeQuery: boolean): string {
  * 将浏览器抛出的值转换为结构可预测的诊断记录。
  * @param error - Error 实例、rejection 原因或任意抛出值。
  */
-function errorPayload(error: unknown): Record<string, unknown> {
-  if (error instanceof Error) {
-    return { name: error.name, message: error.message, stack: error.stack };
-  }
-  return { message: typeof error === 'string' ? error : 'Unknown browser error', reason: error };
-}
 
 /** 安装并在之后恢复埋点的浏览器生命周期插件。 */
 export class BrowserPlugin implements TelemetryPlugin {
@@ -143,7 +137,7 @@ export class BrowserPlugin implements TelemetryPlugin {
           name: 'browser.exception',
           level: 'error',
           payload: {
-            ...errorPayload(event.error ?? event.message),
+            ...normalizeError(event.error ?? event.message),
             filename: event.filename,
             line: event.lineno,
             column: event.colno,
@@ -187,7 +181,7 @@ export class BrowserPlugin implements TelemetryPlugin {
         type: 'monitor',
         name: 'browser.unhandled_rejection',
         level: 'error',
-        payload: { ...errorPayload(event.reason), ...breadcrumbs },
+        payload: { ...normalizeError(event.reason), ...breadcrumbs },
       });
     };
     window.addEventListener('error', onError, true);
@@ -401,7 +395,7 @@ export class BrowserPlugin implements TelemetryPlugin {
         url: safeUrl(url, this.options.includeUrlQuery),
         durationMs: Math.max(0, performance.now() - started),
         ...(status !== undefined ? { status } : {}),
-        ...(error ? { error: errorPayload(error) } : {}),
+        ...(error ? { error: normalizeError(error) } : {}),
         ...breadcrumbs,
       },
     });

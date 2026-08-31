@@ -1,6 +1,6 @@
 import { BrowserPlugin, type BrowserPluginOptions } from '@trace-glow-internal/browser';
 import { ContextManager } from '@trace-glow-internal/context';
-import { TelemetryClient, type TelemetryClientConfig } from '@trace-glow-internal/core';
+import { normalizeError, TelemetryClient, type TelemetryClientConfig } from '@trace-glow-internal/core';
 import { Logger, type LoggerOptions } from '@trace-glow-internal/logger';
 import { HttpTransport } from '@trace-glow-internal/transport';
 import { Component, createContext, createElement, useContext, type ErrorInfo, type ReactElement, type ReactNode } from 'react';
@@ -66,8 +66,8 @@ export interface TraceGlowErrorBoundaryProps { /** 受保护子树。 */ childre
 export function captureReactError(telemetry: TraceGlow, error: unknown, info: ErrorInfo): void {
   try {
     /** 归一化 React 抛出值。 */
-    const normalizedError = error instanceof Error ? error : new Error(String(error));
-    telemetry.client.capture({ type: 'monitor', name: 'next.component_error', level: 'error', payload: { errorName: normalizedError.name, message: normalizedError.message, ...(normalizedError.stack ? { stack: normalizedError.stack } : {}), ...(info.componentStack ? { componentStack: info.componentStack } : {}) } });
+    const normalizedError = normalizeError(error);
+    telemetry.client.capture({ type: 'monitor', name: 'next.component_error', level: 'error', payload: { ...normalizedError, ...(info.componentStack ? { componentStack: info.componentStack } : {}) } });
   } catch { /* SDK 失败不得破坏 Next 错误恢复流程。 */ }
 }
 

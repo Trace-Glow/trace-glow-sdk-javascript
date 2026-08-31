@@ -1,7 +1,8 @@
 /** 公开的运行时无关客户端实现。 */
 export { TelemetryClient } from './client';
 /** 供自定义处理器和集成使用的公开 JSON 归一化工具。 */
-export { toJsonRecord, toJsonValue } from './json';
+export { normalizeError, toJsonRecord, toJsonValue } from './json';
+export type { NormalizedException, NormalizedStackFrame } from './json';
 /** 供高级内部组装使用的公开有界队列基础组件。 */
 export { BoundedQueue } from './queue';
 /** 自定义 Transport 共享的公开重试基础组件。 */

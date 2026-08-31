@@ -2,6 +2,7 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import { randomUUID } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { monitorEventLoopDelay } from 'node:perf_hooks';
+import { normalizeError } from '@trace-glow-internal/core';
 import type {
   CorrelationContext,
   TelemetryClientApi,
@@ -25,12 +26,6 @@ export interface NodePluginOptions {
 }
 
 /** 将 Error 实例或任意抛出值转换为结构化字段。 */
-function errorPayload(error: unknown): Record<string, unknown> {
-  if (error instanceof Error) {
-    return { name: error.name, message: error.message, stack: error.stack };
-  }
-  return { message: String(error) };
-}
 
 /** 安装进程失败监听器和有界运行时指标采集。 */
 export class NodePlugin implements TelemetryPlugin {
@@ -74,7 +69,7 @@ export class NodePlugin implements TelemetryPlugin {
         type: 'monitor',
         name: 'node.uncaught_exception',
         level: 'fatal',
-        payload: { ...errorPayload(error), origin },
+        payload: { ...normalizeError(error), origin },
       });
     };
     process.on('uncaughtExceptionMonitor', onUncaught);
@@ -87,7 +82,7 @@ export class NodePlugin implements TelemetryPlugin {
           type: 'monitor',
           name: 'node.unhandled_rejection',
           level: 'error',
-          payload: errorPayload(reason),
+          payload: normalizeError(reason),
         });
       };
       process.on('unhandledRejection', onRejection);
