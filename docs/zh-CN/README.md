@@ -6,5 +6,6 @@
 - [Next.js 集成](next.md)
 - [本地包联调](local-development.md)
 - [发布流程](publishing.md)
+- [SDK 迭代计划](../plan/README.md)
 
 [English](../en/README.md)
