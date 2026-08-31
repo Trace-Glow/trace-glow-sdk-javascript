@@ -6,7 +6,7 @@ import { compileContracts, outputPath, schemaPath } from './contracts-codegen.mj
 /** contracts 仓库路径必须显式传入，并忽略 pnpm 透传的参数分隔符。 */
 const contractsRoot = process.argv.slice(2).find((argument) => argument !== '--');
 if (!contractsRoot) {
-  throw new Error('Usage: pnpm contracts:sync -- /absolute/path/to/trace-glow-contracts');
+  throw new Error('Usage: pnpm contracts:sync -- ../trace-glow-contracts');
 }
 /** 权威 v1 Schema 在 contracts 仓库中的固定相对位置。 */
 const sourceSchemaPath = resolve(contractsRoot, 'schemas/v1/contracts.schema.json');

@@ -37,9 +37,10 @@ React 包遵守浏览器隔离边界，并内联相同的私有浏览器模块�
 版本化 Schema 快照及其来源 SHA-256，并根据该快照生成 core 使用的 TypeScript
 类型。快照使 SDK 构建保持可复现，同时不会增加对其他仓库的运行时依赖。
 
-对于 AI 工作，远程 `trace-glow-contracts/context/` 目录是系统公共上下文的
-来源。本地 `AGENTS.md` 要求 Agent 在做出跨仓库假设前，读取一个固定的
-contracts commit 以及 SDK 专属上下文文件。
+对于 AI 工作，同级本地 `../trace-glow-contracts/context/` 目录是系统公共
+上下文的来源。本地 `AGENTS.md` 要求 Agent 在做出跨仓库假设前，读取一个
+固定的 contracts commit，并在检查远程更新时将本地 commit 与
+`origin/main` 比较。
 
 每个事件都包含 `id`、`timestamp`、`type`、`name`、`level`、SDK 标识、项目/环境/版本元数据、可选关联标识，以及可安全序列化为 JSON 的 payload。未知字段不会被提升为顶层索引字段。
 

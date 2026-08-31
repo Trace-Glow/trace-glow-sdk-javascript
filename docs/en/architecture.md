@@ -52,10 +52,11 @@ source hash, and generates the core TypeScript types from that snapshot. The
 snapshot keeps SDK builds reproducible without introducing a runtime dependency
 on another repository.
 
-For AI work, the remote `trace-glow-contracts/context/` directory is the source
-of shared system context. The local `AGENTS.md` instructs agents to read one
-pinned contracts commit plus the SDK-specific context document before making
-cross-repository assumptions.
+For AI work, the sibling local `../trace-glow-contracts/context/` directory is
+the source of shared system context. The local `AGENTS.md` instructs agents to
+read one pinned contracts commit plus the SDK-specific context document before
+making cross-repository assumptions, and to compare the local commit with
+`origin/main` when checking for remote updates.
 
 Every event contains `id`, `timestamp`, `type`, `name`, `level`, SDK identity,
 project/environment/release metadata, optional correlation identifiers, and a
