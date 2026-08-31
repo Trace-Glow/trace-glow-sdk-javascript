@@ -109,7 +109,7 @@ npm link @trace-glow/node
 本地来源路径同步 Schema：
 
 ```sh
-pnpm contracts:sync -- /absolute/path/to/trace-glow-contracts
+pnpm contracts:sync -- ../trace-glow-contracts
 pnpm contracts:check
 ```
 
@@ -118,9 +118,12 @@ TypeScript 生成类型。不要手工编辑这些文件。SDK 测试会使用�
 `TelemetryClient` 事件，`contracts:check` 会发现 Schema 哈希变化或过期的生成
 产物。
 
-共享 Agent 上下文与构建快照不同。Agent 必须通过 GitHub MCP 或已认证的
-`gh api`，直接从固定的 contracts commit 读取 `context/shared.md`、
-`context/repositories.json` 和 SDK 上下文文件；不要将这些上下文复制到本仓库。
+共享 Agent 上下文与构建快照不同。Agent 必须从同级本地
+`../trace-glow-contracts` checkout 的固定 contracts commit 读取
+`context/shared.md`、`context/repositories.json` 和 SDK 上下文文件。
+任务开始前，可在执行 `git -C ../trace-glow-contracts fetch origin` 后，比较
+其本地 `HEAD` 与 `origin/main` 来检查远程更新；任务期间不要切换固定的
+commit，也不要将这些上下文复制到本仓库。
 
 ## Commit Message 规范
 
