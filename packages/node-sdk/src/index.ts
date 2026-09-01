@@ -71,7 +71,7 @@ export {
 /** 具备响应确认的 HTTP Collector Transport。 */
 export { HttpTransport } from '@trace-glow-internal/transport';
 /** 运行时无关的事件与客户端协议。 */
-export type { DebugOptions, EventInput, TelemetryClientConfig, TelemetryEvent } from '@trace-glow-internal/core';
+export type { DebugOptions, EventInput, Span, SpanKind, SpanOptions, SpanStatus, TelemetryClientConfig, TelemetryEvent, TraceContext } from '@trace-glow-internal/core';
 /** 结构化 Logger 选项协议。 */
 export type { LoggerOptions } from '@trace-glow-internal/logger';
 /** Node.js 埋点与中间件选项协议。 */

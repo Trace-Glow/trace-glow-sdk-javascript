@@ -1,4 +1,4 @@
-import { normalizeError, type TelemetryClientApi, type TelemetryPlugin } from '@trace-glow-internal/core';
+import { formatTraceparent, normalizeError, type Span, type TelemetryClientApi, type TelemetryPlugin } from '@trace-glow-internal/core';
 
 /** 浏览器自动埋点的功能开关与隐私控制。 */
 export interface BrowserPluginOptions {
@@ -24,6 +24,8 @@ export interface BrowserPluginOptions {
   includeUrlQuery?: boolean;
   /** 从网络遥测中排除的 URL 前缀或表达式。 */
   ignoreUrls?: readonly (string | RegExp)[];
+  /** 允许注入 W3C trace Header 的跨域 URL；同源请求默认允许。 */
+  tracePropagationTargets?: readonly (string | RegExp)[];
 }
 
 /** 用于还原错误发生前操作链的有限 Breadcrumb。 */
@@ -62,11 +64,6 @@ function safeUrl(value: string, includeQuery: boolean): string {
   }
 }
 
-/**
- * 将浏览器抛出的值转换为结构可预测的诊断记录。
- * @param error - Error 实例、rejection 原因或任意抛出值。
- */
-
 /** 安装并在之后恢复埋点的浏览器生命周期插件。 */
 export class BrowserPlugin implements TelemetryPlugin {
   /** 用于拒绝重复安装的私有工作区插件标识。 */
@@ -99,6 +96,7 @@ export class BrowserPlugin implements TelemetryPlugin {
       xhr: options.xhr ?? true,
       includeUrlQuery: options.includeUrlQuery ?? false,
       ignoreUrls: options.ignoreUrls ?? [],
+      tracePropagationTargets: options.tracePropagationTargets ?? [],
     };
   }
 
@@ -287,7 +285,12 @@ export class BrowserPlugin implements TelemetryPlugin {
     const original = globalThis.fetch;
     /** 绑定后的采集方法无需依赖 Fetch 包装器内的动态 this。 */
     const captureRequest = this.captureRequest.bind(this);
+    /** 当前客户端用于创建网络 Span。 */
+    const client = this.client;
+    /** 传播判断默认只允许同源，并支持显式跨域目标。 */
+    const shouldPropagateTrace = this.shouldPropagateTrace.bind(this);
     /** 包装器记录元数据，但始终返回或抛出原始操作结果。 */
+    const isIgnoredUrl = this.isIgnoredUrl.bind(this);
     const wrapped: typeof fetch = async function traceGlowFetch(input, init) {
       /** 单调起始时间可避免系统时钟调整导致的误差。 */
       const started = performance.now();
@@ -295,12 +298,34 @@ export class BrowserPlugin implements TelemetryPlugin {
       const method = init?.method ?? (input instanceof Request ? input.method : 'GET');
       /** 有效 URL 同时支持 Request 和 string/URL 类型的 Fetch 输入。 */
       const url = input instanceof Request ? input.url : String(input);
+      /** 被忽略的请求既不产生兼容 monitor 事件，也不创建自动 Span。 */
+      const ignored = isIgnoredUrl(url);
+      /** 每个 Fetch 生成独立 client Span，保持现有 monitor 事件兼容。 */
+      const span = ignored ? undefined : client?.startSpan(`HTTP ${method.toUpperCase()}`, {
+        kind: 'client',
+        attributes: { 'http.request.method': method.toUpperCase(), 'url.full': safeUrl(url, false) },
+      });
+      /** 仅向同源或显式允许目标注入 Header，避免扩大第三方 CORS 预检。 */
+      let tracedInit = init;
+      if (span && shouldPropagateTrace(url)) {
+        try {
+          /** Headers API 合并 Request 与 init Header，并保留调用方显式覆盖。 */
+          const headers = new Headers(input instanceof Request ? input.headers : init?.headers);
+          if (init?.headers) new Headers(init.headers).forEach((value, key) => headers.set(key, value));
+          /** 调用方显式提供的传播上下文优先，避免改变其跨服务关联语义。 */
+          if (!headers.has('traceparent')) headers.set('traceparent', formatTraceparent(span));
+          tracedInit = { ...init, headers };
+        } catch { /* Header 构造失败时保持原始请求，不影响宿主控制流。 */ }
+      }
       try {
         /** 必须将原始响应不加修改地返回宿主应用。 */
-        const response = await original(input, init);
+        const response = await original(input, tracedInit);
+        span?.setAttribute('http.response.status_code', response.status)
+          .setStatus(response.status >= 500 ? 'error' : 'ok').end();
         captureRequest('fetch', method, url, started, response.status);
         return response;
       } catch (error) {
+        span?.setStatus('error').end();
         /* 埋点记录 rejection 后重新抛出，确保业务行为不变。 */
         captureRequest('fetch', method, url, started, undefined, error);
         throw error;
@@ -321,9 +346,15 @@ export class BrowserPlugin implements TelemetryPlugin {
     /** 保留原始 send 方法，用于透明委托和恢复。 */
     const originalSend = prototype.send;
     /** 弱引用 Key 防止埋点继续持有已完成的 XHR 实例。 */
-    const requests = new WeakMap<XMLHttpRequest, { method: string; url: string; started: number }>();
+    const requests = new WeakMap<XMLHttpRequest, { method: string; url: string; started: number; span?: Span }>();
     /** 绑定后的采集方法不依赖 XHR 包装器的动态 this 值。 */
     const captureRequest = this.captureRequest.bind(this);
+    /** 当前客户端用于创建 XHR client Span。 */
+    const client = this.client;
+    /** 传播判断与 Fetch 使用相同的同源安全默认值。 */
+    const shouldPropagateTrace = this.shouldPropagateTrace.bind(this);
+    /** URL 忽略判断供 XHR 包装函数稳定调用。 */
+    const isIgnoredUrl = this.isIgnoredUrl.bind(this);
 
     /** 记录方法和 URL 后，将每个 open() 重载委托给浏览器。 */
     function open(this: XMLHttpRequest, method: string, url: string | URL, ...rest: unknown[]): void {
@@ -334,10 +365,25 @@ export class BrowserPlugin implements TelemetryPlugin {
     function send(this: XMLHttpRequest, body?: Document | XMLHttpRequestBodyInit | null): void {
       /** open() 为当前 XHR 实例记录的元数据。 */
       const request = requests.get(this);
-      if (request) request.started = performance.now();
+      if (request) {
+        request.started = performance.now();
+        /** 客户端存在时才保存 Span，满足精确可选属性语义。 */
+        const span = isIgnoredUrl(request.url) ? undefined : client?.startSpan(`HTTP ${request.method.toUpperCase()}`, {
+          kind: 'client',
+          attributes: { 'http.request.method': request.method.toUpperCase(), 'url.full': safeUrl(request.url, false) },
+        });
+        if (span) request.span = span;
+        if (request.span && shouldPropagateTrace(request.url)) {
+          try { this.setRequestHeader('traceparent', formatTraceparent(request.span)); } catch { /* 保持原始 XHR 行为。 */ }
+        }
+      }
       /** 完成处理器采集状态并自行移除，以及时释放闭包。 */
       const onLoadEnd = (): void => {
-        if (request) captureRequest('xhr', request.method, request.url, request.started, this.status);
+        if (request) {
+          request.span?.setAttribute('http.response.status_code', this.status)
+            .setStatus(this.status >= 500 || this.status === 0 ? 'error' : 'ok').end();
+          captureRequest('xhr', request.method, request.url, request.started, this.status);
+        }
         this.removeEventListener('loadend', onLoadEnd);
       };
       this.addEventListener('loadend', onLoadEnd);
@@ -371,13 +417,7 @@ export class BrowserPlugin implements TelemetryPlugin {
     error?: unknown,
   ): void {
     /** 匹配结果防止 Collector 请求和配置地址被自身埋点。 */
-    const ignored = this.options.ignoreUrls.some((pattern) => {
-      if (typeof pattern === 'string') return url.startsWith(pattern);
-      /* 重置有状态的 global/sticky 表达式，使重复请求的匹配结果保持确定性。 */
-      pattern.lastIndex = 0;
-      return pattern.test(url);
-    });
-    if (ignored) return;
+    if (this.isIgnoredUrl(url)) return;
     /** HTTP 事件只附带请求开始前的线索，避免快照包含当前请求自身。 */
     const breadcrumbs = this.breadcrumbPayload();
     /** 网络请求摘要作为 Breadcrumb，帮助解释后续脚本异常的触发背景。 */
@@ -398,6 +438,30 @@ export class BrowserPlugin implements TelemetryPlugin {
         ...(error ? { error: normalizeError(error) } : {}),
         ...breadcrumbs,
       },
+    });
+  }
+
+  /** 判断 URL 是否允许携带 W3C Trace Context，默认只允许同源。 */
+  private shouldPropagateTrace(value: string): boolean {
+    try {
+      /** 相对 URL 以当前页面为基准，同源请求无需显式配置。 */
+      const url = new URL(value, globalThis.location?.href);
+      if (globalThis.location?.origin && url.origin === globalThis.location.origin) return true;
+    } catch { /* 无法解析时只尝试显式目标规则。 */ }
+    return this.options.tracePropagationTargets.some((pattern) => {
+      if (typeof pattern === 'string') return value.startsWith(pattern);
+      pattern.lastIndex = 0;
+      return pattern.test(value);
+    });
+  }
+
+  /** 判断 URL 是否匹配 Collector 或应用配置的忽略规则。 */
+  private isIgnoredUrl(value: string): boolean {
+    return this.options.ignoreUrls.some((pattern) => {
+      if (typeof pattern === 'string') return value.startsWith(pattern);
+      /* 重置有状态的 global/sticky 表达式，使重复请求的匹配结果保持确定性。 */
+      pattern.lastIndex = 0;
+      return pattern.test(value);
     });
   }
 }

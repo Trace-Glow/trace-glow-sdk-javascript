@@ -2,7 +2,7 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import { randomUUID } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { monitorEventLoopDelay } from 'node:perf_hooks';
-import { normalizeError } from '@trace-glow-internal/core';
+import { normalizeError, parseTraceparent } from '@trace-glow-internal/core';
 import type {
   CorrelationContext,
   TelemetryClientApi,
@@ -24,8 +24,6 @@ export interface NodePluginOptions {
   /** 选择启用 rejection 观察；该选项会改变 Node.js 默认监听行为。 */
   unhandledRejections?: boolean;
 }
-
-/** 将 Error 实例或任意抛出值转换为结构化字段。 */
 
 /** 安装进程失败监听器和有界运行时指标采集。 */
 export class NodePlugin implements TelemetryPlugin {
@@ -231,13 +229,26 @@ export function createHttpMiddleware(
     const started = process.hrtime.bigint();
     /** 传播到响应、上下文和事件的稳定请求标识。 */
     const id = requestId(request, header);
+    /** 合法远程父上下文使当前服务 Span 延续调用方 trace。 */
+    const remoteParent = parseTraceparent(typeof request.headers.traceparent === 'string' ? request.headers.traceparent : undefined);
+    /** 入站请求 Span 与原有 monitor 事件并行，支持消费者渐进迁移。 */
+    const span = client.startSpan(`${request.method ?? 'GET'} ${cleanRequestUrl(request.url, false)}`, {
+      ...(remoteParent ? { parent: remoteParent } : {}),
+      kind: 'server',
+      attributes: {
+        'http.request.method': request.method ?? 'GET',
+        'url.path': cleanRequestUrl(request.url, options.includeUrlQuery ?? false),
+      },
+    });
     response.setHeader(header, id);
     response.once('finish', () => {
+      span.setAttribute('http.response.status_code', response.statusCode)
+        .setStatus(response.statusCode >= 500 ? 'error' : 'ok').end();
       client.capture({
         type: 'monitor',
         name: 'node.http_request',
         level: response.statusCode >= 500 ? 'error' : 'info',
-        context: { requestId: id },
+        context: { requestId: id, traceId: span.traceId },
         payload: {
           method: request.method ?? 'GET',
           url: cleanRequestUrl(request.url, options.includeUrlQuery ?? false),
@@ -248,7 +259,7 @@ export function createHttpMiddleware(
     });
     /** 在异步本地作用域内创建调用包装器，以便传播上下文。 */
     const invoke = (): void => next();
-    if (options.requestContext) options.requestContext.run({ requestId: id }, invoke);
+    if (options.requestContext) options.requestContext.run({ requestId: id, traceId: span.traceId }, invoke);
     else invoke();
   };
 }
@@ -288,20 +299,35 @@ export function createKoaMiddleware(
     const rawId = context.request.headers[header];
     /** 复用有效字符串标识；其他形式会获得新 UUID。 */
     const id = typeof rawId === 'string' && rawId ? rawId : randomUUID();
+    /** Koa Header 中的远程上下文与 Connect 中间件使用相同校验。 */
+    const rawTraceparent = context.request.headers.traceparent;
+    /** 只接受单值 W3C Header，拒绝歧义数组。 */
+    const remoteParent = parseTraceparent(typeof rawTraceparent === 'string' ? rawTraceparent : undefined);
+    /** Koa 入站请求 Span 覆盖完整下游异步执行。 */
+    const span = client.startSpan(`${context.method} ${cleanRequestUrl(context.url, false)}`, {
+      ...(remoteParent ? { parent: remoteParent } : {}),
+      kind: 'server',
+      attributes: {
+        'http.request.method': context.method,
+        'url.path': cleanRequestUrl(context.url, options.includeUrlQuery ?? false),
+      },
+    });
     context.set(header, id);
     /** 单调起始时间戳覆盖整个下游 Koa 调用链。 */
     const started = process.hrtime.bigint();
     /** 异步调用包装器在 AsyncLocalStorage 作用域内创建后续资源。 */
     const invoke = async (): Promise<unknown> => next();
     try {
-      if (options.requestContext) await options.requestContext.run({ requestId: id }, invoke);
+      if (options.requestContext) await options.requestContext.run({ requestId: id, traceId: span.traceId }, invoke);
       else await invoke();
     } finally {
+      span.setAttribute('http.response.status_code', context.status)
+        .setStatus(context.status >= 500 ? 'error' : 'ok').end();
       client.capture({
         type: 'monitor',
         name: 'node.http_request',
         level: context.status >= 500 ? 'error' : 'info',
-        context: { requestId: id },
+        context: { requestId: id, traceId: span.traceId },
         payload: {
           method: context.method,
           url: cleanRequestUrl(context.url, options.includeUrlQuery ?? false),

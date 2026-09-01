@@ -25,6 +25,6 @@ export class NextServerTraceGlow {
 
 /** Next 服务端公开的 Node 适配能力。 */
 export { ContextManager, TelemetryClient, Logger, HttpTransport, NodePlugin, NodeRequestContext, createHttpMiddleware };
-export type { DebugOptions, EventInput, TelemetryClientConfig, TelemetryEvent } from '@trace-glow-internal/core';
+export type { DebugOptions, EventInput, Span, SpanKind, SpanOptions, SpanStatus, TelemetryClientConfig, TelemetryEvent, TraceContext } from '@trace-glow-internal/core';
 export type { LoggerOptions } from '@trace-glow-internal/logger';
 export type { HttpMiddlewareOptions, NodePluginOptions, NodeMiddleware } from '@trace-glow-internal/node';

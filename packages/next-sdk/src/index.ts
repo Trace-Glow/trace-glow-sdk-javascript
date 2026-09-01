@@ -94,5 +94,5 @@ export function TraceGlowErrorBoundary(props: TraceGlowErrorBoundaryProps): Reac
 export { BrowserPlugin, ContextManager, TelemetryClient, Logger, HttpTransport };
 export { BeaconTransport } from '@trace-glow-internal/transport';
 export type { BrowserPluginOptions } from '@trace-glow-internal/browser';
-export type { DebugOptions, EventInput, TelemetryClientConfig, TelemetryEvent } from '@trace-glow-internal/core';
+export type { DebugOptions, EventInput, Span, SpanKind, SpanOptions, SpanStatus, TelemetryClientConfig, TelemetryEvent, TraceContext } from '@trace-glow-internal/core';
 export type { LoggerOptions } from '@trace-glow-internal/logger';

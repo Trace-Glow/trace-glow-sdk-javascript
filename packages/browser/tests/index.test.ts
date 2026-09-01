@@ -1,13 +1,16 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { BrowserPlugin } from '../src/index';
-import type { EventInput, TelemetryClientApi } from '@trace-glow-internal/core';
+import type { EventInput, Span, TelemetryClientApi } from '@trace-glow-internal/core';
 
 /** 测试期间替换的浏览器窗口对象，记录插件安装的事件监听器。 */
 const ORIGINAL_WINDOW = globalThis.window;
+/** 测试后恢复的原始 Fetch。 */
+const ORIGINAL_FETCH = globalThis.fetch;
 
 /** 恢复浏览器全局对象和控制台 spy，避免测试之间互相污染。 */
 afterEach(() => {
   globalThis.window = ORIGINAL_WINDOW;
+  globalThis.fetch = ORIGINAL_FETCH;
   vi.restoreAllMocks();
 });
 
@@ -116,5 +119,48 @@ describe('BrowserPlugin error monitoring', () => {
     /** 读取第二条 console 事件的 Breadcrumb 快照。 */
     const breadcrumbs = (events[1]?.payload as Record<string, unknown> | undefined)?.breadcrumbs as Array<{ message: string }> | undefined;
     expect(breadcrumbs?.[0]?.message).toContain('second');
+  });
+
+  /** 显式允许的跨域 Fetch 应注入 W3C Header 并结束 client Span。 */
+  it('injects traceparent for configured Fetch targets', async () => {
+    installWindowStub();
+    /** 固定 Span 使 Header 断言保持确定性。 */
+    const span: Span = {
+      traceId: '4bf92f3577b34da6a3ce929d0e0e4736',
+      spanId: '00f067aa0ba902b7',
+      sampled: true,
+      setAttribute: () => span,
+      setStatus: () => span,
+      end: vi.fn(),
+    };
+    /** 保存 Fetch 接收的 Header。 */
+    let traceparent: string | null = null;
+    globalThis.fetch = vi.fn(async (_input, init) => {
+      traceparent = new Headers(init?.headers).get('traceparent');
+      return new Response(null, { status: 204 });
+    });
+    /** 客户端替身仅记录自动 Span，兼容 monitor 事件无需额外断言。 */
+    const client: TelemetryClientApi = {
+      capture: () => undefined,
+      addEventProcessor: () => () => undefined,
+      flush: async () => undefined,
+      startSpan: () => span,
+    };
+    /** 仅启用 Fetch 并明确允许测试 API 域名传播。 */
+    const plugin = new BrowserPlugin({
+      errors: false,
+      resources: false,
+      unhandledRejections: false,
+      console: false,
+      performance: false,
+      fetch: true,
+      xhr: false,
+      tracePropagationTargets: ['https://api.example/'],
+    });
+    plugin.setup(client);
+    await globalThis.fetch('https://api.example/orders');
+    plugin.teardown();
+    expect(traceparent).toBe('00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01');
+    expect(span.end).toHaveBeenCalledOnce();
   });
 });

@@ -165,6 +165,7 @@ Pass these fields through the `instrumentation` property of the browser or Vue p
 | `xhr` | `boolean` | `true` | Instruments `XMLHttpRequest` duration and status. |
 | `includeUrlQuery` | `boolean` | `false` | Retains URL query strings. Leave disabled unless query data has been reviewed for sensitive values. URL fragments remain excluded by default. |
 | `ignoreUrls` | `readonly (string \| RegExp)[]` | `[]` | Excludes matching URL prefixes or regular expressions from Fetch/XHR telemetry. The configured collector endpoint is always added automatically. |
+| `tracePropagationTargets` | `readonly (string \| RegExp)[]` | `[]` | Allows `traceparent` injection for selected cross-origin Fetch/XHR targets. Same-origin requests are allowed by default. |
 
 Example:
 
