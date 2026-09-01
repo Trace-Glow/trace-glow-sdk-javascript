@@ -152,6 +152,7 @@ const telemetry = new TraceGlow({
 | `xhr` | `boolean` | `true` | 采集 `XMLHttpRequest` 的耗时和状态码。 |
 | `includeUrlQuery` | `boolean` | `false` | 是否保留 URL 查询参数。仅在确认查询参数不包含敏感数据后启用；URL fragment 默认仍会排除。 |
 | `ignoreUrls` | `readonly (string \| RegExp)[]` | `[]` | 排除匹配指定 URL 前缀或正则表达式的 Fetch/XHR 事件。配置的 Collector 地址始终会被自动加入排除列表。 |
+| `tracePropagationTargets` | `readonly (string \| RegExp)[]` | `[]` | 允许向指定跨域 Fetch/XHR 目标注入 `traceparent`。同源请求默认允许传播。 |
 
 示例：
 

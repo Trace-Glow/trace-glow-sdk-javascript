@@ -86,7 +86,7 @@ export { VuePlugin } from '@trace-glow-internal/vue';
 /** 浏览器埋点选项协议。 */
 export type { BrowserPluginOptions } from '@trace-glow-internal/browser';
 /** 运行时无关的事件与客户端协议。 */
-export type { DebugOptions, EventInput, TelemetryClientConfig, TelemetryEvent } from '@trace-glow-internal/core';
+export type { DebugOptions, EventInput, Span, SpanKind, SpanOptions, SpanStatus, TelemetryClientConfig, TelemetryEvent, TraceContext } from '@trace-glow-internal/core';
 /** 结构化 Logger 选项协议。 */
 export type { LoggerOptions } from '@trace-glow-internal/logger';
 /** Vue 应用类型。 */

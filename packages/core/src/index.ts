@@ -3,6 +3,8 @@ export { TelemetryClient } from './client';
 /** 供自定义处理器和集成使用的公开 JSON 归一化工具。 */
 export { normalizeError, toJsonRecord, toJsonValue } from './json';
 export type { NormalizedException, NormalizedStackFrame } from './json';
+/** W3C Trace Context 的解析和格式化工具。 */
+export { formatTraceparent, parseTraceparent } from './trace-context';
 /** 供高级内部组装使用的公开有界队列基础组件。 */
 export { BoundedQueue } from './queue';
 /** 自定义 Transport 共享的公开重试基础组件。 */
@@ -34,5 +36,6 @@ export type {
   TelemetryEvent,
   TelemetryPlugin,
   Transport,
+  TraceContext,
   UserContext,
 } from './types';

@@ -60,12 +60,22 @@ export interface EventInput {
 
 /** 创建 Span 时可选的初始元数据。 */
 export interface SpanOptions {
-  /** 可选父 Span；未提供时创建新的 trace。 */
-  parent?: Span;
+  /** 可选本地 Span 或远程传播上下文；未提供时创建新的 trace。 */
+  parent?: Span | TraceContext;
   /** Span 在调用链中的角色。 */
   kind?: SpanKind;
   /** 初始结构化属性。 */
   attributes?: Record<string, unknown>;
+}
+
+/** 由 W3C `traceparent` 或本地 Span 提供的最小传播上下文。 */
+export interface TraceContext {
+  /** 32 位小写十六进制 trace ID。 */
+  readonly traceId: string;
+  /** 16 位小写十六进制 parent span ID。 */
+  readonly spanId: string;
+  /** 是否保留该 trace 的采样决策。 */
+  readonly sampled: boolean;
 }
 
 /** 可结束并上报一次 Trace Glow span 的句柄。 */
@@ -76,6 +86,8 @@ export interface Span {
   readonly spanId: string;
   /** 父 span 标识。 */
   readonly parentSpanId?: string;
+  /** 当前 trace 的稳定采样决策。 */
+  readonly sampled: boolean;
   /** 为 span 设置或覆盖属性。 */
   setAttribute(key: string, value: unknown): this;
   /** 将 span 标记为成功或失败。 */

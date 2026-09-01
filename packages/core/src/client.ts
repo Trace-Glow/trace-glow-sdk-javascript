@@ -20,9 +20,17 @@ const DEFAULT_RETRY: Required<RetryConfig> = { attempts: 3, baseDelayMs: 250, ma
 
 /** 生成指定字节长度的十六进制追踪标识。 */
 function traceId(bytes: number): string {
+  /** 使用 Web Crypto 时获得高质量随机字节；旧运行时再使用时间与 Math.random 混合值。 */
   const values = new Uint8Array(bytes);
-  globalThis.crypto?.getRandomValues?.(values);
-  if (values.every((value) => value === 0)) values[0] = Date.now() & 0xff;
+  const cryptoApi = globalThis.crypto;
+  if (cryptoApi?.getRandomValues) cryptoApi.getRandomValues(values);
+  else {
+    const entropy = `${Date.now()}-${Math.random()}-${Math.random()}`;
+    for (let index = 0; index < values.length; index += 1) {
+      values[index] = entropy.charCodeAt(index % entropy.length) ^ ((Date.now() >>> (index % 24)) & 0xff);
+    }
+  }
+  if (values.every((value) => value === 0)) values[0] = 1;
   return [...values].map((value) => value.toString(16).padStart(2, '0')).join('');
 }
 
@@ -151,7 +159,7 @@ export class TelemetryClient implements TelemetryClientApi {
       this.config.onDrop?.(1, 'invalid');
       return;
     }
-    if (Math.random() >= this.config.sampleRate) {
+    if (input.type !== 'trace' && Math.random() >= this.config.sampleRate) {
       this.config.onDrop?.(1, 'sampled');
       return;
     }
@@ -199,6 +207,8 @@ export class TelemetryClient implements TelemetryClientApi {
 
   /** 创建显式 Span，结束时通过统一 capture 管道上报并隔离异常。 */
   startSpan(name: string, options: SpanOptions = {}): Span {
+    /** 远程父级采样决策必须原样继承；根 Span 使用客户端统一采样率。 */
+    const sampled = options.parent?.sampled ?? Math.random() < this.config.sampleRate;
     const started = new Date();
     const currentTraceId = options.parent?.traceId ?? traceId(16);
     const currentSpanId = traceId(8);
@@ -209,6 +219,7 @@ export class TelemetryClient implements TelemetryClientApi {
       traceId: currentTraceId,
       spanId: currentSpanId,
       ...(options.parent ? { parentSpanId: options.parent.spanId } : {}),
+      sampled,
       setAttribute: (key, value) => {
         if (key) attributes[key] = value;
         return span;
@@ -220,6 +231,10 @@ export class TelemetryClient implements TelemetryClientApi {
       end: () => {
         if (ended) return;
         ended = true;
+        if (!sampled) {
+          this.config.onDrop?.(1, 'sampled');
+          return;
+        }
         const durationMs = Math.max(0, Date.now() - started.getTime());
         this.capture({
           type: 'trace',
