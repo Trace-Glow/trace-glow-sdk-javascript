@@ -160,7 +160,7 @@ Pass these fields through the `instrumentation` property of the browser or Vue p
 | `console` | `boolean` | `true` | Captures `console.error` and `console.warn` as monitor events while preserving the original console output. |
 | `breadcrumbs` | `boolean` | `true` | Attaches recent console, resource, HTTP, and exception breadcrumbs to error events. |
 | `maxBreadcrumbs` | `number` | `100` | Maximum breadcrumb entries retained in memory per browser client; older entries are evicted first. |
-| `performance` | `boolean` | `true` | Captures supported LCP, layout shift, and long-task performance entries. |
+| `performance` | `boolean` | `true` | Captures Web Vitals (FCP, LCP, CLS, INP, TTFB) plus supported Navigation, Resource, Paint, and Long Task entries. |
 | `fetch` | `boolean` | `true` | Instruments global Fetch duration, status, and failures while preserving application behavior. |
 | `xhr` | `boolean` | `true` | Instruments `XMLHttpRequest` duration and status. |
 | `includeUrlQuery` | `boolean` | `false` | Retains URL query strings. Leave disabled unless query data has been reviewed for sensitive values. URL fragments remain excluded by default. |
