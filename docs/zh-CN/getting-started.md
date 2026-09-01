@@ -230,6 +230,7 @@ Logger 方法接受稳定的消息名称和可选结构化字段，例如 `logge
 | `context.setTag(key, value)` | 添加低基数、可搜索的标签，例如区域或套餐。 |
 | `context.setExtra(key, value)` | 添加 JSON 安全的诊断数据，该数据不应作为索引标签使用。 |
 | `context.setCorrelation({ traceId, requestId, sessionId })` | 添加用于关联事件的非空标识。 |
+| `client.startSpan(name, options)` | 创建显式 trace span；使用 `setAttribute`、`setStatus` 和 `end` 完成并入队。通过 `options.parent` 创建子 span。 |
 | `context.clear()` | 清除全部共享用户、标签、额外信息和关联上下文。 |
 | `client.capture(input)` | 手动事件入队。`type` 和 `name` 必填；`level` 默认为 `info`；`timestamp`、事件级 `context` 和 `payload` 可选。 |
 | `client.flush()` | 等待待处理事件，并立即尝试发送当前队列。 |

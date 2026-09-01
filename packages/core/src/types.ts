@@ -1,5 +1,7 @@
 import type {
   EventLevel,
+  SpanKind,
+  SpanStatus,
   EventType,
   TelemetryContext,
   TelemetryEvent,
@@ -11,6 +13,8 @@ export type {
   CorrelationContext,
   Envelope,
   EventLevel,
+  SpanKind,
+  SpanStatus,
   EventType,
   JsonArray,
   JsonObject,
@@ -36,6 +40,48 @@ export interface EventInput {
   context?: TelemetryContext;
   /** 将被转换为有界 JSON 安全数据的任意值。 */
   payload?: Record<string, unknown>;
+  /** 可选的分布式 trace 标识。 */
+  traceId?: string;
+  /** 当前 span 标识。 */
+  spanId?: string;
+  /** 父 span 标识。 */
+  parentSpanId?: string;
+  /** Span 角色。 */
+  spanKind?: SpanKind;
+  /** Span 完成状态。 */
+  spanStatus?: SpanStatus;
+  /** Span 开始时间。 */
+  startTimestamp?: string;
+  /** Span 持续时间，单位为毫秒。 */
+  durationMs?: number;
+  /** Span 属性。 */
+  attributes?: Record<string, unknown>;
+}
+
+/** 创建 Span 时可选的初始元数据。 */
+export interface SpanOptions {
+  /** 可选父 Span；未提供时创建新的 trace。 */
+  parent?: Span;
+  /** Span 在调用链中的角色。 */
+  kind?: SpanKind;
+  /** 初始结构化属性。 */
+  attributes?: Record<string, unknown>;
+}
+
+/** 可结束并上报一次 Trace Glow span 的句柄。 */
+export interface Span {
+  /** 当前 trace 标识。 */
+  readonly traceId: string;
+  /** 当前 span 标识。 */
+  readonly spanId: string;
+  /** 父 span 标识。 */
+  readonly parentSpanId?: string;
+  /** 为 span 设置或覆盖属性。 */
+  setAttribute(key: string, value: unknown): this;
+  /** 将 span 标记为成功或失败。 */
+  setStatus(status: SpanStatus): this;
+  /** 结束 span 并入队一次 trace 事件；重复调用幂等。 */
+  end(): void;
 }
 
 /** 内核传递给 Transport 的单次请求控制项。 */
@@ -74,6 +120,8 @@ export interface TelemetryClientApi {
   addEventProcessor(processor: EventProcessor): () => void;
   /** 等待未完成处理并尝试清空当前队列。 */
   flush(): Promise<void>;
+  /** 创建一个显式 Span，并在结束时通过 trace 事件上报。 */
+  startSpan(name: string, options?: SpanOptions): Span;
 }
 
 /** 应用于传输失败的指数退避重试设置。 */

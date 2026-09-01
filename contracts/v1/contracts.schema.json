@@ -20,7 +20,17 @@
     "EventType": {
       "description": "Collector 用于路由记录的高层事件类别。",
       "type": "string",
-      "enum": ["monitor", "log", "internal"]
+      "enum": ["monitor", "log", "trace", "internal"]
+    },
+    "SpanKind": {
+      "description": "用于描述 span 在调用链中的角色。",
+      "type": "string",
+      "enum": ["internal", "server", "client", "producer", "consumer"]
+    },
+    "SpanStatus": {
+      "description": "Span 完成时的标准状态。",
+      "type": "string",
+      "enum": ["unset", "ok", "error"]
     },
     "JsonPrimitive": {
       "description": "无需自定义编码即可传输的 JSON 标量值。",
@@ -188,6 +198,33 @@
         },
         "sdk": { "$ref": "#/$defs/SdkIdentity" },
         "context": { "$ref": "#/$defs/TelemetryContext" },
+        "spanId": {
+          "description": "当前 span 的 16 字节十六进制标识。",
+          "type": "string",
+          "pattern": "^[0-9a-f]{16}$"
+        },
+        "parentSpanId": {
+          "description": "父 span 的 16 字节十六进制标识。",
+          "type": "string",
+          "pattern": "^[0-9a-f]{16}$"
+        },
+        "spanKind": { "$ref": "#/$defs/SpanKind" },
+        "spanStatus": { "$ref": "#/$defs/SpanStatus" },
+        "startTimestamp": {
+          "description": "Span 开始时间。",
+          "type": "string",
+          "format": "date-time"
+        },
+        "durationMs": {
+          "description": "Span 持续时间，单位为毫秒。",
+          "type": "number",
+          "minimum": 0
+        },
+        "attributes": {
+          "description": "Span 的 JSON 安全属性，禁止请求体和敏感 Header。",
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/JsonValue" }
+        },
         "payload": {
           "description": "事件专属的 JSON 安全数据。",
           "type": "object",

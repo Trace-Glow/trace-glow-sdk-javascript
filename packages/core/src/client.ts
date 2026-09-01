@@ -5,6 +5,8 @@ import type {
   EventInput,
   EventProcessor,
   RetryConfig,
+  Span,
+  SpanOptions,
   TelemetryClientApi,
   TelemetryClientConfig,
   TelemetryEvent,
@@ -15,6 +17,14 @@ import type {
 const SDK = { name: '@trace-glow-internal/core', version: '0.1.0' } as const;
 /** 保守的重试默认值用于平衡瞬时故障恢复与关闭延迟。 */
 const DEFAULT_RETRY: Required<RetryConfig> = { attempts: 3, baseDelayMs: 250, maxDelayMs: 5_000 };
+
+/** 生成指定字节长度的十六进制追踪标识。 */
+function traceId(bytes: number): string {
+  const values = new Uint8Array(bytes);
+  globalThis.crypto?.getRandomValues?.(values);
+  if (values.every((value) => value === 0)) values[0] = Date.now() & 0xff;
+  return [...values].map((value) => value.toString(16).padStart(2, '0')).join('');
+}
 
 /**
  * 在可用时使用加密 UUID 能力生成事件标识。
@@ -158,7 +168,16 @@ export class TelemetryClient implements TelemetryClientApi {
       ...(this.config.environment ? { environment: this.config.environment } : {}),
       ...(this.config.release ? { release: this.config.release } : {}),
       sdk: this.config.sdk ?? SDK,
-      ...(input.context ? { context: input.context } : {}),
+      ...(input.context || input.traceId
+        ? { context: { ...input.context, ...(input.traceId ? { traceId: input.traceId } : {}) } }
+        : {}),
+      ...(input.spanId ? { spanId: input.spanId } : {}),
+      ...(input.parentSpanId ? { parentSpanId: input.parentSpanId } : {}),
+      ...(input.spanKind ? { spanKind: input.spanKind } : {}),
+      ...(input.spanStatus ? { spanStatus: input.spanStatus } : {}),
+      ...(input.startTimestamp ? { startTimestamp: input.startTimestamp } : {}),
+      ...(input.durationMs !== undefined ? { durationMs: input.durationMs } : {}),
+      ...(input.attributes ? { attributes: toJsonRecord(input.attributes) } : {}),
       payload: toJsonRecord(input.payload),
     };
     /*
@@ -176,6 +195,47 @@ export class TelemetryClient implements TelemetryClientApi {
   addEventProcessor(processor: EventProcessor): () => void {
     this.processors.add(processor);
     return () => this.processors.delete(processor);
+  }
+
+  /** 创建显式 Span，结束时通过统一 capture 管道上报并隔离异常。 */
+  startSpan(name: string, options: SpanOptions = {}): Span {
+    const started = new Date();
+    const currentTraceId = options.parent?.traceId ?? traceId(16);
+    const currentSpanId = traceId(8);
+    const attributes: Record<string, unknown> = { ...options.attributes };
+    let status: 'unset' | 'ok' | 'error' = 'unset';
+    let ended = false;
+    const span: Span = {
+      traceId: currentTraceId,
+      spanId: currentSpanId,
+      ...(options.parent ? { parentSpanId: options.parent.spanId } : {}),
+      setAttribute: (key, value) => {
+        if (key) attributes[key] = value;
+        return span;
+      },
+      setStatus: (nextStatus) => {
+        status = nextStatus;
+        return span;
+      },
+      end: () => {
+        if (ended) return;
+        ended = true;
+        const durationMs = Math.max(0, Date.now() - started.getTime());
+        this.capture({
+          type: 'trace',
+          name,
+          traceId: currentTraceId,
+          spanId: currentSpanId,
+          ...(options.parent ? { parentSpanId: options.parent.spanId } : {}),
+          spanKind: options.kind ?? 'internal',
+          spanStatus: status,
+          startTimestamp: started.toISOString(),
+          durationMs,
+          attributes,
+        });
+      },
+    };
+    return span;
   }
 
   /**

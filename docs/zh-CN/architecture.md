@@ -44,6 +44,10 @@ React 包遵守浏览器隔离边界，并内联相同的私有浏览器模块�
 
 每个事件都包含 `id`、`timestamp`、`type`、`name`、`level`、SDK 标识、项目/环境/版本元数据、可选关联标识，以及可安全序列化为 JSON 的 payload。未知字段不会被提升为顶层索引字段。
 
+Trace 事件还可以携带 `spanId`、`parentSpanId`、`spanKind`、`spanStatus`、
+`startTimestamp`、`durationMs` 和有界 JSON 安全属性。SDK 先提供显式 Span；
+自动运行时传播将在后续 tracing 集成工作中加入。
+
 `trace-glow-collector-server` 应使用 `(projectId, id)` 去重，以 `timestamp`
 作为事件时间，补充服务端接收时间，拒绝过大的 payload，并将发送语义视为至少一次。Schema 带有版本号，使采集服务能够支持 SDK 的滚动升级。
 

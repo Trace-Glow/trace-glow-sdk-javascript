@@ -261,6 +261,7 @@ protocol. The Node.js class additionally exposes `requestContext`.
 | `context.setTag(key, value)` | Adds a low-cardinality searchable label such as region or plan. |
 | `context.setExtra(key, value)` | Adds JSON-safe diagnostic data that is not intended as an indexed tag. |
 | `context.setCorrelation({ traceId, requestId, sessionId })` | Adds non-empty identifiers used to correlate events. |
+| `client.startSpan(name, options)` | Starts an explicit trace span; call `setAttribute`, `setStatus`, and `end` to enqueue it. Child spans use `options.parent`. |
 | `context.clear()` | Removes all shared user, tag, extra, and correlation context. |
 | `client.capture(input)` | Queues a manual event. `type` and `name` are required; `level` defaults to `info`; `timestamp`, event-local `context`, and `payload` are optional. |
 | `client.flush()` | Waits for pending processing and attempts immediate delivery of the current queue. |

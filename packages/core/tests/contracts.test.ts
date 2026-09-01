@@ -3,6 +3,7 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { describe, expect, it } from 'vitest';
 import { TelemetryClient } from '../src/client';
+import { normalizeError } from '../src/json';
 import type { TelemetryEvent, Transport } from '../src/types';
 
 /** SDK 快照中权威 Schema 的稳定 `$id`。 */
@@ -50,5 +51,15 @@ describe('Trace Glow contract snapshot', () => {
     const validate = ajv.getSchema(`${CONTRACT_SCHEMA_ID}#/$defs/TelemetryEvent`);
     expect(validate).toBeDefined();
     expect(validate?.(sent[0]), JSON.stringify(validate?.errors)).toBe(true);
+  });
+
+  /** 验证共享异常归一化同时保留旧字段并提供结构化异常节点。 */
+  it('normalizes error causes and stack frames', () => {
+    /** 构造带 cause 的异常以覆盖跨运行时共享路径。 */
+    const error = new Error('outer', { cause: new TypeError('inner') });
+    /** 调用归一化器并读取稳定的 JSON 结果。 */
+    const normalized = normalizeError(error) as { exception: { type: string; cause?: { type: string } } };
+    expect(normalized.exception.type).toBe('Error');
+    expect(normalized.exception.cause?.type).toBe('TypeError');
   });
 });

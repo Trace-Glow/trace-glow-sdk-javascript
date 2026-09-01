@@ -56,3 +56,80 @@ export function toJsonRecord(value: Record<string, unknown> | undefined): Record
   if (!value) return {};
   return toJsonValue(value) as Record<string, JsonValue>;
 }
+
+/** 可跨运行时传输的 stack frame 摘要。 */
+export interface NormalizedStackFrame {
+  /** 函数或方法名称。 */
+  function?: string;
+  /** 源文件 URL 或路径。 */
+  filename?: string;
+  /** 源码行号。 */
+  lineno?: number;
+  /** 源码列号。 */
+  colno?: number;
+  /** 是否为原生运行时 frame。 */
+  native?: boolean;
+}
+
+/** 结构化异常链中的单个异常节点。 */
+export interface NormalizedException {
+  /** JavaScript 异常构造器名称。 */
+  type: string;
+  /** 异常消息。 */
+  value: string;
+  /** 原始 stack 文本，兼容字段仍由顶层 stack 提供。 */
+  stacktrace?: string;
+  /** 解析出的有限 stack frame。 */
+  frames?: readonly NormalizedStackFrame[];
+  /** 嵌套 cause，达到深度上限后停止。 */
+  cause?: NormalizedException;
+}
+
+/** 将 Error、cause 和任意抛出值转换为有界、可序列化的异常数据。 */
+export function normalizeError(error: unknown, depth = 0): Record<string, unknown> {
+  /** 防止恶意 cause 链或循环对象造成递归失控。 */
+  const boundedDepth = Math.min(Math.max(depth, 0), MAX_DEPTH);
+  /** Error 实例提供稳定类型、消息和 stack；其他值使用安全字符串。 */
+  const source = error instanceof Error ? error : undefined;
+  /** 统一异常节点供旧字段和新 exception 字段共同复用。 */
+  const exception: NormalizedException = {
+    type: source?.name || typeof error,
+    value: source?.message || String(error),
+    ...(source?.stack && source.stack.length > 2_048 ? { frames: parseStackFrames(source.stack) } : {}),
+    ...(source && 'cause' in source && source.cause !== undefined && boundedDepth < MAX_DEPTH
+      ? { cause: normalizeErrorNode(source.cause, boundedDepth + 1) }
+      : {}),
+  };
+  return {
+    name: exception.type,
+    message: exception.value,
+    ...(source?.stack ? { stack: source.stack } : {}),
+    exception,
+  };
+}
+
+/** 将嵌套 cause 转成异常节点，避免重复暴露旧版顶层字段。 */
+function normalizeErrorNode(error: unknown, depth: number): NormalizedException {
+  /** 通过共享入口获取有限字段，再提取 exception 节点。 */
+  return normalizeError(error, depth).exception as NormalizedException;
+}
+
+/** 从常见 V8/浏览器 stack 文本中提取有限 frame。 */
+function parseStackFrames(stack: string): readonly NormalizedStackFrame[] {
+  /** 只保留有限数量，避免超长 stack 消耗事件预算。 */
+  const frames: NormalizedStackFrame[] = [];
+  for (const line of stack.split('\n').slice(0, 50)) {
+    /** 兼容 `at fn (url:line:column)` 和 `at url:line:column` 格式。 */
+    const match = line.match(/^\s*at\s+(?:(.*?)\s+\()?(.+?):(\d+):(\d+)\)?\s*$/);
+    if (!match) continue;
+    const [, functionName, filename, lineNumber, columnNumber] = match;
+    frames.push({
+      ...(functionName ? { function: functionName } : {}),
+      ...(filename ? { filename } : {}),
+      lineno: Number(lineNumber),
+      colno: Number(columnNumber),
+      native: filename === 'native',
+    });
+  }
+  return frames;
+}
