@@ -1,4 +1,5 @@
 import { formatTraceparent, normalizeError, type Span, type TelemetryClientApi, type TelemetryPlugin } from '@trace-glow-internal/core';
+import { onCLS, onFCP, onINP, onLCP, onTTFB, type Metric } from 'web-vitals';
 
 /** 浏览器自动埋点的功能开关与隐私控制。 */
 export interface BrowserPluginOptions {
@@ -109,7 +110,10 @@ export class BrowserPlugin implements TelemetryPlugin {
     if (typeof window === 'undefined') return;
     if (this.options.errors || this.options.resources || this.options.unhandledRejections) this.observeErrors();
     if (this.options.console) this.instrumentConsole();
-    if (this.options.performance) this.observePerformance();
+    if (this.options.performance) {
+      this.observePerformance();
+      this.observeWebVitals();
+    }
     if (this.options.fetch) this.instrumentFetch();
     if (this.options.xhr) this.instrumentXhr();
   }
@@ -258,7 +262,7 @@ export class BrowserPlugin implements TelemetryPlugin {
     /** 使用运行时支持的条目类型，防止 observe() 在旧浏览器中抛出异常。 */
     const supported = PerformanceObserver.supportedEntryTypes;
     /** 对请求的条目类型进行过滤，而不假设其全局可用。 */
-    const entryTypes = ['largest-contentful-paint', 'layout-shift', 'longtask']
+    const entryTypes = ['navigation', 'resource', 'paint', 'largest-contentful-paint', 'layout-shift', 'longtask']
       .filter((type) => supported.includes(type));
     if (entryTypes.length === 0) return;
 
@@ -270,12 +274,43 @@ export class BrowserPlugin implements TelemetryPlugin {
         this.client?.capture({
           type: 'monitor',
           name: `browser.performance.${entry.entryType}`,
-          payload: { duration: entry.duration, startTime: entry.startTime, details },
+          payload: { measurement: { entryType: entry.entryType, duration: entry.duration, startTime: entry.startTime, details } },
         });
       }
     });
     observer.observe({ entryTypes });
     this.cleanups.push(() => observer.disconnect());
+  }
+
+  /** 使用 web-vitals 官方实现采集标准 FCP、LCP、CLS、INP 和 TTFB。 */
+  private observeWebVitals(): void {
+    /** 指标回调统一转成兼容 v1 的 measurement payload。 */
+    const report = (metric: Metric): void => {
+      this.client?.capture({
+        type: 'monitor',
+        name: `browser.web_vital.${metric.name.toLowerCase()}`,
+        payload: {
+          measurement: {
+            name: metric.name,
+            value: metric.value,
+            delta: metric.delta,
+            id: metric.id,
+            rating: metric.rating,
+            navigationType: metric.navigationType,
+          },
+        },
+      });
+    };
+    /** web-vitals 在不支持对应 API 的浏览器中自行跳过回调。 */
+    try {
+      onCLS(report);
+      onFCP(report);
+      onINP(report);
+      onLCP(report);
+      onTTFB(report);
+    } catch {
+      /* 性能采集属于可选能力，初始化失败不得影响宿主应用。 */
+    }
   }
 
   /** 包装全局 Fetch，同时保留原始响应和 rejection 语义。 */

@@ -147,7 +147,7 @@ const telemetry = new TraceGlow({
 | `console` | `boolean` | `true` | 采集 `console.error` 和 `console.warn` 作为监控事件，同时保留原始控制台输出。 |
 | `breadcrumbs` | `boolean` | `true` | 将最近的 console、资源、HTTP 和异常 Breadcrumb 附加到错误事件。 |
 | `maxBreadcrumbs` | `number` | `100` | 每个浏览器客户端在内存中保留的 Breadcrumb 最大条数，超出后优先淘汰最早条目。 |
-| `performance` | `boolean` | `true` | 采集浏览器支持的 LCP、布局偏移和长任务性能条目。 |
+| `performance` | `boolean` | `true` | 采集 Web Vitals（FCP、LCP、CLS、INP、TTFB），以及浏览器支持的 Navigation、Resource、Paint 和 Long Task 条目。 |
 | `fetch` | `boolean` | `true` | 采集全局 Fetch 的耗时、状态码和失败信息，同时保持原有应用行为。 |
 | `xhr` | `boolean` | `true` | 采集 `XMLHttpRequest` 的耗时和状态码。 |
 | `includeUrlQuery` | `boolean` | `false` | 是否保留 URL 查询参数。仅在确认查询参数不包含敏感数据后启用；URL fragment 默认仍会排除。 |
