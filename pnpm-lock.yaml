@@ -51,16 +51,6 @@ importers:
         specifier: ^3.2.4
         version: 3.2.7(@types/node@22.20.1)(jiti@2.6.1)(tsx@4.23.13)
 
-  demos/native:
-    dependencies:
-      '@trace-glow/browser':
-        specifier: workspace:*
-        version: link:../../packages/browser-sdk
-    devDependencies:
-      vite:
-        specifier: ^7.1.3
-        version: 7.3.6(@types/node@22.20.1)(jiti@2.6.1)(tsx@4.23.13)
-
   demos/next:
     dependencies:
       '@trace-glow/next':
@@ -129,6 +119,16 @@ importers:
       typescript:
         specifier: ^5.9.2
         version: 5.9.3
+      vite:
+        specifier: ^7.1.3
+        version: 7.3.6(@types/node@22.20.1)(jiti@2.6.1)(tsx@4.23.13)
+
+  demos/vanilla:
+    dependencies:
+      '@trace-glow/browser':
+        specifier: workspace:*
+        version: link:../../packages/browser-sdk
+    devDependencies:
       vite:
         specifier: ^7.1.3
         version: 7.3.6(@types/node@22.20.1)(jiti@2.6.1)(tsx@4.23.13)

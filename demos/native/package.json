@@ -1,1 +1,0 @@
-{"name":"@trace-glow-demo/native","private":true,"type":"module","scripts":{"dev":"vite","build":"vite build"},"dependencies":{"@trace-glow/browser":"workspace:*"},"devDependencies":{"vite":"^7.1.3"}}

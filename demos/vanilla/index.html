@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trace Glow Vanilla Demo</title>
+  </head>
+  <body>
+    <main id="app">
+      <h1>Vanilla JavaScript demo</h1>
+      <p>Use the actions to emit real SDK telemetry.</p>
+      <div class="actions">
+        <button id="log" type="button">Capture log</button>
+        <button id="span" type="button">Create span</button>
+        <button id="error" type="button">Throw error</button>
+      </div>
+      <pre id="status">SDK starting...</pre>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

@@ -22,7 +22,7 @@
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "pnpm build && pnpm test && changeset publish",
-    "demo:native": "pnpm --filter @trace-glow-demo/native dev",
+    "demo:vanilla": "pnpm --filter @trace-glow-demo/vanilla dev",
     "demo:react": "pnpm --filter @trace-glow-demo/react dev",
     "demo:vue": "pnpm --filter @trace-glow-demo/vue dev",
     "demo:next": "pnpm --filter @trace-glow-demo/next dev",

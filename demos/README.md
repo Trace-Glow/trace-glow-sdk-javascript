@@ -6,7 +6,7 @@ credentials.
 
 | Demo | Runtime | SDK | Command |
 | --- | --- | --- | --- |
-| `native` | Browser, Vite | `@trace-glow/browser` | `pnpm demo:native` |
+| `vanilla` | Browser, Vite | `@trace-glow/browser` | `pnpm demo:vanilla` |
 | `react` | React 18, Vite | `@trace-glow/react` | `pnpm demo:react` |
 | `vue` | Vue 3, Vite | `@trace-glow/vue` | `pnpm demo:vue` |
 | `next` | Next.js App Router | `@trace-glow/next` | `pnpm demo:next` |
