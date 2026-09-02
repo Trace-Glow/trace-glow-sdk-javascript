@@ -241,20 +241,30 @@ export class BrowserPlugin implements TelemetryPlugin {
       .filter((type) => supported.includes(type));
     if (entryTypes.length === 0) return;
 
-    /** Observer 将浏览器专属条目转换为 JSON 安全的监控事件。 */
-    const observer = new PerformanceObserver((list) => {
-      for (const entry of list.getEntries()) {
-        /** 条目详情保留浏览器专属字段，无需硬编码每种子类型。 */
-        const details = entry.toJSON() as Record<string, unknown>;
-        this.client?.capture({
-          type: 'monitor',
-          name: `browser.performance.${entry.entryType}`,
-          payload: { measurement: { entryType: entry.entryType, duration: entry.duration, startTime: entry.startTime, details } },
-        });
+    /** 每种条目独立观察，确保 buffered 选项符合 PerformanceObserver 规范。 */
+    const observers = entryTypes.map((entryType) => {
+      /** Observer 将浏览器专属条目转换为 JSON 安全的监控事件。 */
+      const observer = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          /** 条目详情保留浏览器专属字段，无需硬编码每种子类型。 */
+          const details = entry.toJSON() as Record<string, unknown>;
+          this.client?.capture({
+            type: 'monitor',
+            name: `browser.performance.${entry.entryType}`,
+            payload: { measurement: { entryType: entry.entryType, duration: entry.duration, startTime: entry.startTime, details } },
+          });
+        }
+      });
+      try {
+        observer.observe({ type: entryType, buffered: true });
+        return observer;
+      } catch {
+        /** 单个条目类型不支持 buffered 时不影响其他性能指标。 */
+        observer.disconnect();
+        return undefined;
       }
     });
-    observer.observe({ entryTypes });
-    this.cleanups.push(() => observer.disconnect());
+    this.cleanups.push(() => observers.forEach((observer) => observer?.disconnect()));
   }
 
   /** 使用 web-vitals 官方实现采集标准 FCP、LCP、CLS、INP 和 TTFB。 */
