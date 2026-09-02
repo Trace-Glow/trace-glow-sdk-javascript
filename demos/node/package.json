@@ -1,0 +1,1 @@
+{"name":"@trace-glow-demo/node","private":true,"type":"module","scripts":{"dev":"tsx watch src/server.ts","build":"tsc --noEmit"},"dependencies":{"@trace-glow/node":"workspace:*"},"devDependencies":{"@types/node":"^22.18.0","tsx":"^4.19.2","typescript":"^5.9.2"}}
