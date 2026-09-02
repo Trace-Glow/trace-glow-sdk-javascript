@@ -16,3 +16,8 @@ Run `pnpm install`, copy the selected `.env.example` to `.env`, build the SDK
 packages with `pnpm build`, then start the demo command. Browser write keys are
 visible to users and must be project-scoped ingestion keys. The Node and Next
 server demos read their keys only from server environment variables.
+
+The browser demos enable Web Vitals, Navigation/Resource/Paint/Long Task
+entries, Fetch, XHR, resource failures, console breadcrumbs, and error
+instrumentation by default. Node and Next enable runtime metrics and inbound
+HTTP spans. A reachable Collector is required to inspect delivered events.

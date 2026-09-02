@@ -13,6 +13,7 @@ const statusElement = document.querySelector('#status');
 const logButton = document.querySelector('#log');
 const spanButton = document.querySelector('#span');
 const errorButton = document.querySelector('#error');
+const networkButton = document.querySelector('#network');
 
 let telemetry;
 
@@ -37,6 +38,15 @@ function throwDemoError() {
   throw new Error('Vanilla demo error');
 }
 
+async function fetchPage() {
+  try {
+    await fetch(window.location.href, { cache: 'no-store' });
+    setStatus('Fetch captured; Web Vitals and PerformanceObserver remain enabled.');
+  } catch (error) {
+    setStatus(`Fetch failed and was captured: ${error.message}`);
+  }
+}
+
 try {
   telemetry = new TraceGlow(config);
   telemetry.ready.then(() => setStatus('SDK ready')).catch((error) => {
@@ -48,6 +58,7 @@ try {
 logButton?.addEventListener('click', captureLog);
 spanButton?.addEventListener('click', createSpan);
 errorButton?.addEventListener('click', throwDemoError);
+networkButton?.addEventListener('click', fetchPage);
 window.addEventListener('pagehide', () => {
   if (telemetry) void telemetry.client.shutdown();
 });
