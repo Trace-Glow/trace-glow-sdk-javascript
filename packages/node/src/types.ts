@@ -12,6 +12,7 @@ export interface NodePluginOptions {
 
 /** Node HTTP、Express、Koa 和 Nest 中间件适配器共享的选项。 */
 import type { NodeRequestContext } from './index';
+import type { IncomingMessage, ServerResponse } from 'node:http';
 
 export interface HttpMiddlewareOptions {
   /** 用于将请求 ID 传播到嵌套日志的可选异步本地插件。 */
@@ -23,4 +24,4 @@ export interface HttpMiddlewareOptions {
 }
 
 /** 框架无关的 Connect 风格中间件签名。 */
-export type NodeMiddleware = (request: import('node:http').IncomingMessage, response: import('node:http').ServerResponse, next: (error?: unknown) => void) => void;
+export type NodeMiddleware = (request: IncomingMessage, response: ServerResponse, next: (error?: unknown) => void) => void;

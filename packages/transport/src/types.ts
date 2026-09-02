@@ -23,5 +23,6 @@ export interface BeaconTransportOptions {
   /** 供测试和嵌入式浏览器运行时使用的可注入 Navigator 子集。 */
   navigator?: Pick<Navigator, 'sendBeacon'>;
   /** Beacon 拒绝 payload 时使用的有确认 Transport。 */
-  fallback?: import('@trace-glow-internal/core').Transport;
+  fallback?: Transport;
 }
+import type { Transport } from '@trace-glow-internal/core';

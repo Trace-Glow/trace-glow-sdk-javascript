@@ -1,4 +1,4 @@
-import type { EventLevel, TelemetryClientApi, TelemetryContext } from '@trace-glow-internal/core';
+import type { EventLevel, TelemetryClientApi } from '@trace-glow-internal/core';
 import type { LoggerOptions } from './types';
 export type { LoggerOptions } from './types';
 
