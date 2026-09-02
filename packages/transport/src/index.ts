@@ -5,22 +5,8 @@ import type {
   TelemetryEvent,
   Transport,
 } from '@trace-glow-internal/core';
-
-/** 具备响应确认的 HTTP Collector 投递配置。 */
-export interface HttpTransportOptions {
-  /** Collector 绝对地址。 */
-  endpoint: string;
-  /** 通过专用请求 Header 发送的项目写入密钥。 */
-  apiKey: string;
-  /** 在 SDK Header 之后应用、用于受控覆盖的附加 Header。 */
-  headers?: Record<string, string>;
-  /** 供测试或非标准运行时使用的可注入 Fetch 实现。 */
-  fetch?: typeof globalThis.fetch;
-  /** 压缩策略；auto 仅压缩足够大的 payload。 */
-  compression?: 'auto' | 'gzip' | 'none';
-  /** 开始自动压缩的 UTF-8 字节阈值。 */
-  minimumCompressionBytes?: number;
-}
+import type { BeaconTransportOptions, HttpTransportOptions } from './types';
+export type { BeaconTransportOptions, HttpTransportOptions } from './types';
 
 /** 创建符合共享协议的 Collector 信封，仅复制批次数组而不克隆事件对象。 */
 function envelope(events: readonly TelemetryEvent[]): Envelope {
@@ -99,18 +85,6 @@ export class HttpTransport implements Transport {
       throw new Error(`Trace Glow collector returned ${response.status}`);
     }
   }
-}
-
-/** 浏览器关闭时通过 Navigator.sendBeacon 投递的配置。 */
-export interface BeaconTransportOptions {
-  /** 接受 Beacon 信封内 API Key 的 Collector 地址。 */
-  endpoint: string;
-  /** 由于 Beacon 无法设置自定义 Header，因此嵌入项目写入密钥。 */
-  apiKey: string;
-  /** 供测试和嵌入式浏览器运行时使用的可注入 Navigator 子集。 */
-  navigator?: Pick<Navigator, 'sendBeacon'>;
-  /** Beacon 拒绝 payload 时使用的有确认 Transport。 */
-  fallback?: Transport;
 }
 
 /** 页面关闭时尽力投递、支持可选可靠回退的 Transport。 */

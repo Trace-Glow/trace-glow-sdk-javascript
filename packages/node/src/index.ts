@@ -9,21 +9,11 @@ import type {
   TelemetryEvent,
   TelemetryPlugin,
 } from '@trace-glow-internal/core';
+import type { NodePluginOptions } from './types';
+export type { NodePluginOptions } from './types';
 
 /** 用于监听器、计时器或运行时监控器的幂等卸载操作。 */
 type Cleanup = () => void;
-
-/** Node.js 埋点的功能开关和采集间隔。 */
-export interface NodePluginOptions {
-  /** 定期采集 CPU、内存、事件循环延迟和运行时间。 */
-  runtimeMetrics?: boolean;
-  /** 运行时指标间隔，单位为毫秒。 */
-  metricsIntervalMs?: number;
-  /** 在不改变未捕获异常语义的情况下观察致命进程失败。 */
-  processErrors?: boolean;
-  /** 选择启用 rejection 观察；该选项会改变 Node.js 默认监听行为。 */
-  unhandledRejections?: boolean;
-}
 
 /** 安装进程失败监听器和有界运行时指标采集。 */
 export class NodePlugin implements TelemetryPlugin {

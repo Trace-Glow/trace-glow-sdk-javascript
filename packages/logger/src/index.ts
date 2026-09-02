@@ -1,4 +1,6 @@
 import type { EventLevel, TelemetryClientApi, TelemetryContext } from '@trace-glow-internal/core';
+import type { LoggerOptions } from './types';
+export type { LoggerOptions } from './types';
 
 /** 用于常数时间最低级别过滤的数值严重度顺序。 */
 const PRIORITY: Record<EventLevel, number> = {
@@ -8,16 +10,6 @@ const PRIORITY: Record<EventLevel, number> = {
   error: 40,
   fatal: 50,
 };
-
-/** Logger 应用且由子 Logger 继承的默认值。 */
-export interface LoggerOptions {
-  /** 发送到遥测客户端的最低严重级别。 */
-  minimumLevel?: EventLevel;
-  /** 附加到该 Logger 每条记录的固定上下文。 */
-  context?: TelemetryContext;
-  /** 在单次调用字段之前合并的固定结构化字段。 */
-  fields?: Record<string, unknown>;
-}
 
 /** 通过内核有界事件管道写入的结构化 Logger。 */
 export class Logger {
