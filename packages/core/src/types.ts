@@ -5,7 +5,7 @@ import type {
   EventType,
   TelemetryContext,
   TelemetryEvent,
-} from './generated/contracts';
+} from './generated';
 
 /** 由 trace-glow-contracts 权威 Schema 生成的稳定传输协议类型。 */
 export type {
@@ -24,7 +24,7 @@ export type {
   TelemetryContext,
   TelemetryEvent,
   UserContext,
-} from './generated/contracts';
+} from './generated';
 
 /** 由内核归一化后才成为事件的不可信采集输入。 */
 export interface EventInput {

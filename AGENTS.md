@@ -56,6 +56,26 @@ The remaining packages are private workspace implementation modules:
 
 ## Architecture constraints
 
+## Code organization conventions
+
+- Every source directory must contain an `index.ts` aggregation entry. The
+  entry must only re-export symbols from files in that directory and must not
+  contain runtime logic.
+- Except for aggregation `index.ts` files, type-only files, enum files, and
+  other explicitly non-functional files, functional TypeScript files should
+  remain at or below 300 lines. Exceeding this limit requires splitting the
+  file into cohesive modules.
+- Package types belong in `src/types.ts`; enums belong in `src/enum.ts`; package
+  configuration belongs in dedicated files such as `src/config.ts`. Functional
+  modules must import these definitions rather than declaring package-level
+  types inline.
+- Every package root must contain a detailed `README.md` describing what the
+  package is, supported runtime environments, dependencies, consuming packages,
+  installation and usage examples, lifecycle behavior, and privacy boundaries.
+- Keep aggregation files, type definitions, enums, configuration, and runtime
+  implementation in separate modules so public exports remain discoverable and
+  circular dependencies are avoided.
+
 - Dependencies point inward. Runtime packages may depend on `core`; `core` must never import browser, Node.js, framework, or transport implementations.
 - Browser and Node.js entry points must remain isolated. Browser output must not reference `node:*` or `@trace-glow-internal/node`.
 - React output follows the browser isolation boundary and must not reference `node:*` or `@trace-glow-internal/node`; React itself must remain external as a peer dependency.
