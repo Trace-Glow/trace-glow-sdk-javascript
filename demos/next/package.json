@@ -1,0 +1,1 @@
+{"name":"@trace-glow-demo/next","private":true,"scripts":{"dev":"next dev","build":"next build"},"dependencies":{"@trace-glow/next":"workspace:*","next":"^15.5.0","react":"^18.3.1","react-dom":"^18.3.1"},"devDependencies":{"@types/node":"^22.18.0","@types/react":"^18.3.24","@types/react-dom":"^18.3.7","typescript":"^5.9.2"}}

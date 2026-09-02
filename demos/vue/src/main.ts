@@ -1,0 +1,2 @@
+import { createApp } from 'vue'; import { TraceGlow } from '@trace-glow/vue'; import App from './App.vue'; import './style.css';
+const telemetry = new TraceGlow({ endpoint: import.meta.env.VITE_TRACE_GLOW_ENDPOINT, apiKey: import.meta.env.VITE_TRACE_GLOW_API_KEY, projectId: import.meta.env.VITE_TRACE_GLOW_PROJECT_ID, environment: 'development', debug: { printEvents: true } }); const app = createApp(App); app.provide('trace-glow', telemetry); app.use(telemetry); app.mount('#app');
