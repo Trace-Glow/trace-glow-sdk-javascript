@@ -9,6 +9,8 @@ export { formatTraceparent, parseTraceparent } from './trace-context';
 export { BoundedQueue } from './queue';
 /** 自定义 Transport 共享的公开重试基础组件。 */
 export { withRetry } from './retry';
+/** 显式 Span 生命周期工厂，供内核和运行时集成复用。 */
+export { createSpan } from './span';
 /** 所有私有模块和公开 Bundle 共享的稳定类型协议。 */
 export type {
   BeaconRequest,
